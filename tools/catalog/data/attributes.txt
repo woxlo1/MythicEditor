@@ -1,0 +1,106 @@
+# [section] then param specs: names|type|default|description   (same format as the catalog)
+[mechanicAttributes]
+cooldown,cd|number|0|Cooldown in seconds (decimals allowed)
+delay|integer|0|Delays the execution of the mechanic by a number of ticks
+repeat|integer|0|How many times the mechanic is repeated (if repeatInterval is 0 this is the number of executions)
+repeatInterval,repeatI|integer|0|Ticks between repetitions
+targetInterval,targetI|integer|0|Ticks between target selection
+origin|string||Premium: change the origin to the given targeter, e.g. origin=@Forward{f=10}; parsed separately from the mechanic's targeter and ignored with multiple targets
+power|number|1|Power multiplier
+fromorigin,fo,sourceisorigin,castfromorigin|boolean|false|Cast the mechanic from the origin (only works with a few mechanics)
+targetisorigin|boolean|false|Set the mechanic's target to be the origin
+targetcreative|boolean|false|Whether to target creative players
+splitPower,powersplit,powersplitbetweentargets|boolean|false|Split the power between targets
+faulty|boolean|true|Use the old vector formula
+chance|number|1|Chance of the mechanic executing (0.1 = 10%)
+forcesync,sync|boolean|false|Force the mechanic to run on the main thread (required by some mechanics such as cancelevent)
+[targeterAttributes]
+targetconditions,conditions,cond,c|string||Inline target conditions
+fallback,fb|string||Fallback targeter used if this one returns no target
+sudoparent,fromparent,ofparent,asparent,parent|boolean||Parse the targeter as if it were the Parent of the casting entity
+sudoowner,fromowner,ofowner,asowner,owner|boolean||Parse the targeter as if it were the Owner of the casting entity
+sudotrigger,fromtrigger,oftrigger,astrigger,trigger|boolean||Parse the targeter as if it were the Trigger of the skill tree
+useboundingbox,bb|boolean||Entity targeters: distance checks use the target's bounding box instead of the hitbox center
+unique,u|integer||Entity targeters: max number of times an entity can be targeted (default 1, 0 disables)
+nomegbb,nmb|boolean||Entity targeters: filter out ModelEngine sub hitboxes
+target|enum:targetfilter||Entity targeters: entity types to target (comma separated)
+ignore|enum:ignorefilter||Entity targeters: entity types not to target (comma separated)
+targetself|boolean||Whether to target the caster
+targetplayers|boolean||Whether to target players
+targetcreative|boolean||Whether to target players in creative mode
+targetspectator|boolean||Whether to target players in spectator mode
+targetinvulnerable|boolean||Whether to target invulnerable entities
+targetarmorstands|boolean||Whether to target armor stands
+targetmarkers|boolean||Whether to target markers
+targettextdisplays,targettextdisplay|boolean||Whether to target text displays
+targetitemdisplays,targetitemdisplay|boolean||Whether to target item displays
+targetblockdisplays,targetblockdisplay|boolean||Whether to target block displays
+targetinteractions,targetinteraction|boolean||Whether to target interaction entities
+targetnpcs|boolean||Whether to target Citizens NPCs
+targetanimals|boolean||Whether to target animals
+targetcreatures|boolean||Whether to target creatures
+targetsamefaction|boolean||Whether to target entities of the same faction
+targetowner|boolean||Whether to target the caster's owner
+targetvanilla,targetnonmythic|boolean||Whether to target non-Mythic entities
+targetvillagers|boolean||Whether to target villagers
+targetall|boolean|false|Target everything; when true all filters are ignored
+sort,sortby|enum:sortmode||How to sort targets (distance-based sorts use the mechanic's origin)
+skipTargetsUpToIndex,stuti|integer|0|Skips the first n targets after sorting
+limit|integer|0|Limits the number of targets after the skip
+xoffset,xo,x|number||Location targeters: offset on the x axis
+yoffset,yo,y|number||Location targeters: offset on the y axis
+zoffset,zo,z|number||Location targeters: offset on the z axis
+forwardOffset,foffset,fo|number|0|Location targeters: forward/backward offset based on the caster's view
+sideOffset,soffset,so|number|0|Location targeters: left/right offset based on the caster's view
+upoffset,uoffset,uo|number|0|Location targeters: up/down offset based on the caster's view
+rotatex,rotx|number||Location targeters: rotation on the x axis
+rotatey,roty|number||Location targeters: rotation on the y axis
+rotatez,rotz|number||Location targeters: rotation on the z axis
+coordinatex,cx|number||Location targeters: sets the x coordinate
+coordinatey,cy|number||Location targeters: sets the y coordinate
+coordinatez,cz|number||Location targeters: sets the z coordinate
+length|number||Location targeters: multiplies the direction vector by the value
+blocktypes,blocktype,bt|string||Location targeters: only target these block types (comma separated; prefix # = partial match, @ = starts with, * = block tag)
+blockignores,blockignore,bi|string||Location targeters: exclude these block types (same syntax as blocktype)
+coordinateyaw,cyaw|number||Location targeters: sets the yaw
+coordinatepitch,cpitch|number||Location targeters: sets the pitch
+blockcentered,centered|boolean||Location targeters: target the center of the block at the location
+faulty|boolean|false|Location targeters: use the old vector calculation formula
+blockSurface,surface|boolean|false|Location targeters: adjust the location to be on a surface
+blockSurfaceTolerance,surfaceTolerance|number|5|Location targeters: tolerance when searching for a surface
+[conditionActions]
+true|The skill runs if this condition is met (default)
+false|The skill does not run if this condition is met
+power <multiplier>|Multiplies the skill's power by the multiplier
+cast <skill>|Casts an additional skill if the condition is met, without affecting the original skill
+castinstead <skill>|Casts a different skill instead if the condition is met
+orElseCast <skill>|Casts a different skill instead if the condition is not met
+[colorCodes]
+&0|Black
+&1|Dark Blue
+&2|Dark Green
+&3|Dark Aqua
+&4|Dark Red
+&5|Dark Purple
+&6|Gold
+&7|Gray
+&8|Dark Gray
+&9|Blue
+&a|Green
+&b|Aqua
+&c|Red
+&d|Light Purple
+&e|Yellow
+&f|White
+&k|Magic
+&l|Bold
+&m|Strike through
+&n|Underline
+&o|Italic
+&r|Reset
+[enum:targetfilter]
+ground,water,flying,self,caster,player,players,creative,spectator,armorstand,armor_stand,marker,textdisplay,text_display,itemdisplay,item_display,blockdisplay,block_display,interaction,npc,animal,animals,creature,creatures,monster,monsters,villager,villagers,vanilla,mythic
+[enum:ignorefilter]
+player,players,creative,spectator,armorstand,armor_stand,marker,textdisplay,text_display,itemdisplay,item_display,blockdisplay,block_display,interaction,npc,animal,animals,creature,creatures,monster,monsters,villager,villagers,faction,owner,vanilla,nonmythic,mythic
+[enum:sortmode]
+NONE,RANDOM,NEAREST,FURTHEST,HIGHEST_HEALTH,LOWEST_HEALTH,HIGHEST_THREAT,LOWEST_THREAT

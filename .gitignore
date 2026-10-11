@@ -1,0 +1,10 @@
+.gradle/
+build/
+core/build/
+*.class
+web/node_modules/
+web/dist/
+.idea/
+*.iml
+.vscode/
+*.log

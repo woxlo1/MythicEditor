@@ -1,0 +1,146 @@
+# [scoped] suffix|type|description  -- expanded for the scopes caster, target, trigger
+# [plain] name|type|description
+[scoped]
+absorption|Double|Current absorption (golden) health, or 0 (alias: absorb)
+armor|Double|Armor value
+attack_cooldown|Double|Attack cooldown of the player's equipped item (0 = max cooldown, 1 = none)
+aura.[auraName].stacks|Integer|Number of stacks of the given aura
+block.data|String|Block data at the location
+block.hardness|Float|Block hardness at the location
+block.type|String|Block type at the location
+children|List|UUIDs of the entity's children
+children.size|Integer|Number of children the entity has
+cinematic.active|String|Whether the player is in an active cinematic camera (true/false)
+cinematic.frame|Integer|Ticks played since the active cinematic started, or -1 if none
+cinematic.progress|Double|Progress of the active cinematic from 0.0 to 1.0
+damage|Double|Attack_Damage attribute value
+display|String|Displayed name
+distance|Double|Distance between the entity and the caster
+distancesquared|Double|Distance between the entity and the caster, squared
+enchantlevel.[enchant]|Integer|Total levels of the enchant across all slots
+item|Item|For item entities, the item
+item.amount|Integer|For item entities, the item amount (otherwise 0)
+item.model|Integer|For item entities, the custom model data (otherwise 0)
+item.itemstack.[slot]|String|Itemstack in the given slot
+item.type|String|For item entities, the item type (otherwise AIR)
+itemcount.[materialOrItem]|Integer|How many of a vanilla material or Mythic item the player has
+entity_type|String|Type of the entity
+faction|String|Faction of the entity
+fovoffset{rotation=0;absolute=true}|Double|Angular offset (degrees) between the caster's view direction and the direction to the target
+globalcooldown|Integer|Global cooldown of the entity
+hp|Double|Current health
+php|Double|Health percent
+mhp|Double|Max health
+heldenchantlevel.[enchant]|Integer|Levels of the enchant on the item in the HAND slot
+held.item|Item|The entity's held item
+input.[key]|Integer|1 if the player is pressing the key (forward backward left right jump sneak sprint) else 0
+lastsignal|String|Last signal received
+level|Double|Mythic level
+l.pitch|Double|Location pitch
+l.yaw|Double|Location yaw
+l.w|String|Location world
+l.x|Double|Location centered x coordinate
+l.x.double|Double|Location precise x coordinate
+l.y|Double|Location centered y coordinate
+l.y.double|Double|Location precise y coordinate
+l.z|Double|Location centered z coordinate
+l.z.double|Double|Location precise z coordinate
+luck|Double|Luck attribute
+mythic_type|String|Internal Mythic type id
+name|String|Name of the entity
+pity.[category]|Double|Pity for the given category
+raytrace{maxdistance=4.5}||Name of the block the entity looks at within maxdistance (default 4.5), or AIR
+skill.[metaskill].cooldown|Float|Current cooldown of the given skill
+stance|String|Current stance
+stat.[stat]|Float|Value of the given stat
+threat|Double|Threat the caster has towards the entity
+throwstrength.[component]|Double|Throw strength in a throw context (horizontal vertical total)
+tt.top|String|Name of the top threat holder
+tt.size|Integer|Number of entities on the threat table
+type|String|Internal id of a MythicMob, or the entity name otherwise
+type.name|String|Display name of a MythicMob, or the entity name otherwise
+uuid|String|UUID of the entity
+velocity|Double|Velocity
+velocity.global.[component]|Double|Velocity in world space (x y z total)
+velocity.relative.[component]|Double|Velocity in the entity's local frame (x y z total)
+ydiff|Double|Y difference between the caster and the location
+slot.item.[slot]|Item|Item in the given equipment slot or inventory index, drillable (e.g. caster.slot.item.HAND.amount)
+score.[objective]|Integer|Score of the scoped entity in the objective
+var.[name]|String|Value of the variable in the scoped entity's registry
+[plain]
+drop.amount||Amount dropped while used in specific drop types
+drops.xp||XP dropped via specific drop types
+drops.money||Money dropped through Vault
+echo.[text]|String|The given text after the placeholders inside it are parsed
+random.1to10||Random integer in the range (replace 1to10 with #to#)
+random.float.1to10||Random float in the range (replace 1to10 with #to#)
+random.float.rounded.1to10|String|Random float in the range rounded to 2 decimals
+random.uuid|String|Random UUID
+utils.epoch|Long|Current epoch
+utils.epoch.seconds|Long|Current epoch in seconds
+utils.epoch.timestamp|Long|Milliseconds elapsed since the epoch
+utils.epoch.millis|Long|Milliseconds of the current epoch
+utils.epoch.ticks|Long|Current epoch converted to ticks (assumes 20 TPS)
+skill.[skill].charges|Integer|Available charges of the skill for the caster
+skill.[skill].maxcharges|Integer|Maximum charges configured for the skill
+skill.[skill].overflowcharges|Integer|Overflow charges of the skill for the caster
+skill.power|Float|Power of the metaskill in which the placeholder is evaluated
+skill.targets|Integer|Number of inherited targets
+spawner.pir|Integer|Players in the spawner's radius
+char.[unicode]|String|Unicode identifier to character (e.g. char.007B gives an opening curly bracket); useful in load-order sensitive contexts
+item.amount|Integer|Amount of the item that triggered the skill
+item.droplevel|Integer|Drop level of the item if it is a drop, otherwise like item.amount
+mythicitem.[item].material|String|Material of the Mythic item
+mythicitem.[item].model|String|Custom model data of the Mythic item
+mythicitem.[item].display|String|Display name of the Mythic item
+mythicitem.[item].lore|String|Lore of the Mythic item, one line per lore line
+mythicitem.[item].itemstack|String|Itemstack of the Mythic item
+global.score.[objective]|Integer|Score of the fake player __GLOBAL__ in the objective
+score.[objective].[player]|Integer|Score of the player or dummy name in the objective
+bar{value=0;maxValue=100;length=100;remainingSymbol="#";progressSymbol="#"}|String|Formatted progress bar
+centertext{value=text;pixelwidth=100;bold=false}|String|Centers the given text
+dialog.[key]|String|Value submitted for the key input of an open dialog (dialog.button = clicked button index)
+world.var.[name]||Variable in the world's registry
+global.var.[name]||Variable in the server-wide registry
+skill.var.[name]||Variable on the current skill tree
+skill.var.damage-amount||Damage taken or done (onDamaged/onAttack/onBowHit triggers and mechanics)
+skill.var.damage-type||Damage type taken or done (or comma-separated damage tags, or SKILL)
+skill.var.damage-tags||Comma-separated damage tags
+skill.var.damage-cause||Cause of damage taken or done
+skill.var.aura-name||Name of the aura (inside aura mechanics)
+skill.var.aura-type||Type of the aura
+skill.var.aura-charges||Charges the aura has left
+skill.var.aura-duration||Remaining duration of the aura
+skill.var.aura-duration-millis||Remaining duration of the aura in milliseconds
+skill.var.aura-stacks||Stacks the aura has
+skill.var.input||Chat input (onChat mechanic)
+skill.var.interval||Current iteration (repeat/repeatInterval)
+skill.var.itr||Current iteration (repeat/repeatInterval)
+skill.var.volume||Sound intensity 1 to 15, higher when further away (onHear trigger)
+skill.var.sound-type||Type of the heard sound (onHear trigger)
+skill.var.hit-block-type||Block that was hit, or AIR (raytrace mechanic)
+skill.var.bow-tension||Force with which the projectile was shot (onShoot trigger)
+skill.var.click-type||Click type on a menu button: 1 for right click else 0
+placeholder.[name]||Custom placeholder defined in a pack's placeholders.yml
+&co||Colon
+&sq||Apostrophe
+&da||Dash
+&bs||Backslash
+&fs||Forward slash
+&sp||Space
+&cm||Comma
+&sc||Semicolon
+&eq||Equals symbol
+&dq||Double quotes
+&rb||Right bracket
+&lb||Left bracket
+&rc||Right curly bracket
+&lc||Left curly bracket
+&nm||Number sign
+&nl||New line
+&heart||Heart symbol
+&skull||Skull and bones symbol
+&lt||Less-than symbol
+&gt||Greater-than symbol
+^dot||Dot
+^dot2||The placeholder that returns a dot (for sensitive placeholder parsing)

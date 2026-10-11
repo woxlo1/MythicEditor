@@ -1,0 +1,90 @@
+# group|Name|Shorthands(comma)|description   (group: entity-single entity-multi threat location-single location-multi meta-entity meta-location special)
+entity-single|Self|Caster,Boss,Mob|Targets the caster of the mechanic
+entity-single|Target|T|Targets the caster's target
+entity-single|Trigger||Targets the entity that triggered the skill
+entity-single|NearestPlayer||Targets the nearest player in radius
+entity-single|WolfOwner||Targets the owner of the wolf
+entity-single|Owner||Targets the owner of the mob
+entity-single|Parent|summoner|Targets the parent of the mob
+entity-single|Mount||Targets the caster's original mount
+entity-single|Father|dad,daddy|Targets the father of the casting mob
+entity-single|Mother|mom,mommy|Targets the mother of the casting mob
+entity-single|Passenger||Targets the rider of the casting mob
+entity-single|PlayerByName|specificplayer|Targets a specific player by name (supports placeholders)
+entity-single|UniqueIdentifier|UUID|Targets a specific entity by UUID (supports placeholders)
+entity-single|Vehicle||Targets the caster's vehicle
+entity-single|InteractionLastAttacker|lastAttacker|Targets the last entity that attacked the casting INTERACTION entity
+entity-single|InteractionLastInteract|lastInteract|Targets the last entity that interacted with the casting INTERACTION entity
+entity-single|OwnerLocation||Targets the position of the mob's owner
+entity-single|ParentLocation|summonerlocation|Targets the position of the mob's parent
+entity-multi|LivingInCone|entitiesInCone,livingEntitiesInCone,LEIC,EIC|Targets living entities in a cone with a given angle, length and rotation relative to the facing direction
+entity-multi|LivingInWorld|EIW|Targets all living entities in the caster's world
+entity-multi|NotLivingNearOrigin|nonLivingNearOrigin,NLNO|Targets all non-living entities in a radius near the origin
+entity-multi|PlayersInRadius|PIR|Targets all players in the given radius
+entity-multi|MobsInRadius|MIR|Targets all MythicMobs or vanilla overrides of the given type in a radius
+entity-multi|EntitiesInRadius|livingEntitiesInRadius,livingInRadius,allInRadius,EIR|Targets all entities in the given radius
+entity-multi|EntitiesInRing|EIRR|Targets all entities in the given ring
+entity-multi|EntitiesInRingNearOrigin|ERNO|Targets all entities in the given ring around the origin
+entity-multi|PlayersInWorld|World|Targets all players in the current world
+entity-multi|PlayersOnServer|Server,Everyone|Targets all players on the server
+entity-multi|PlayersInRing||Targets all players between the specified min and max radius
+entity-multi|PlayersNearOrigin|PNO|Targets players near the origin of a metaskill
+entity-multi|TrackedPlayers|tracked|Targets players within the render distance of the caster
+entity-multi|MobsNearOrigin||Targets MythicMobs or vanilla overrides of the given type(s) in a radius around the origin
+entity-multi|EntitiesNearOrigin|ENO|Targets all entities near the origin of a metaskill
+entity-multi|Children|child,summons|Targets any child entities summoned by the caster
+entity-multi|Siblings|sibling,brothers,sisters|Targets any mobs that share the caster's parent
+entity-multi|ItemsNearOrigin||Targets item drops near the origin of a metaskill
+entity-multi|ItemsInRadius|IIR|Targets all item drops in the given radius
+threat|ThreatTable|TT|Targets every entity on the casting mob's threat table
+threat|ThreatTablePlayers||Targets all players on the casting mob's threat table
+threat|RandomThreatTarget|RTT|Targets a random entity on the casting mob's threat table
+threat|RandomThreatTargetLocation|RTTL|Targets the location of a random entity on the threat table
+location-single|SelfLocation|casterLocation,bossLocation,mobLocation|Targets the caster's location
+location-single|SelfEyeLocation|eyeDirection,casterEyeLocation,bossEyeLocation,mobEyeLocation|Targets the caster's eye location
+location-single|Forward||Targets a location in front of the caster's facing direction
+location-single|ProjectileForward||Targets a location in front of the casting projectile, relative to its direction
+location-single|TargetLocation|targetloc,TL|Targets the caster's target's location
+location-single|TargetPredictedLocation|targetPredictedLoc,TPL,PredictedTargetLocation|Targets where the caster's top target will be after some ticks, based on its movement speed
+location-single|TriggerLocation||Targets the location of the entity that triggered the skill
+location-single|SpawnLocation||Targets the world's spawn location
+location-single|CasterSpawnLocation||Targets the location the caster spawned at
+location-single|Location||Targets the specified coordinates in the caster's world
+location-single|Origin|source|Targets the origin/source of a metaskill (usually the caster; the projectile for Projectile skills)
+location-single|ObstructingBlock||Tries to target the block in front of the caster that obstructs it
+location-single|TargetBlock||Targets the block the casting player is looking at
+location-single|TrackedLocation||Targets the mob's tracked location
+location-single|NearestStructure||Targets the nearest structure of the specified type within a radius
+location-single|VariableLocation|varLocation|Targets the location stored in the specified variable
+location-single|HighestBlock||Targets the highest block at the skill origin
+location-single|PlayerLocationByName||Targets a specific player's location by name
+location-single|EscapeLocation||Targets a nearby safe location like an Enderman's teleport destination
+location-multi|ForwardWall||Targets a plane in front of the caster
+location-multi|PlayerLocationsInRadius|PLIR|Targets all player locations in the given radius
+location-multi|Pin||Targets the location(s) of a pin
+location-multi|Ring||Targets points forming a ring of locations
+location-multi|RandomRingPoint||Targets random points in a ring around the caster
+location-multi|Cone||Targets points forming a cone (fixed on the y-axis)
+location-multi|Sphere||Targets points in a sphere around the caster
+location-multi|Rectangle|cube,cuboid|Targets points forming a rectangle
+location-multi|RandomLocationsNearCaster|randomLocations,RLNC|Targets random locations near the caster
+location-multi|RandomLocationsNearOrigin|RLO,randomLocationsOrigin,RLNO|Targets random locations near the origin of a skill
+location-multi|BlocksNearOrigin|BNO|Targets all blocks in a radius around the origin of the metaskill
+location-multi|RingAroundOrigin|ringOrigin,RAO|Targets locations in a ring around the origin
+location-multi|Spawners||Targets the location of the specified spawners
+location-multi|BlocksInPinRegion||Targets the blocks in a region delimited by two pins
+location-multi|ChunksInWERegion|chunksInWGRegion|Targets the 0,0 chunk corners of chunks in a WorldGuard region
+meta-entity|LivingInLine|entitiesInLine,livingEntitiesInLine,LEIL,EIL|Targets entities in a line between the inherited target and the casting mob
+meta-entity|LivingNearTargetLocation|LNTL,ENTL,ENT|Targets all living entities near the inherited target
+meta-entity|PlayersNearTargetLocations|playersNearTargetLocation,PNTL|Targets all players near the inherited targets
+meta-entity|TargetedTarget|Targeted|Targets the inherited targeted entities
+meta-location|Line||Targets locations between the mob and the inherited targets
+meta-location|RandomLocationsNearTargets|randomLocationsNearTarget,randomLocationsNearTargetEntities,randomLocationsNearTargetLocations,RLNT,RLNTE,RLNTL|Targets random locations around the inherited targets
+meta-location|FloorOfTargets|FOT,floorsOfTarget|Targets the blocks underneath the inherited targets
+meta-location|LocationsOfTargets|locationOfTarget,LOT|Targets the location of the inherited target entities
+meta-location|TargetedLocation|targetedLocations,targetedLoc|Targets the location of the inherited target locations
+meta-location|BlocksInRadius|BIR|Targets all blocks in a radius of the inherited targets
+meta-location|BlocksInChunk|BIC|Targets all blocks in a chunk relative to the inherited target
+meta-location|BlockVein|vein,bv|Targets all adjacent blocks matching the blocktype, starting from the origin
+special|None||Provides no target (for mechanics with no target input)
+special|Region||Targets a region (only works with specific mechanics)

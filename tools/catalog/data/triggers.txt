@@ -1,0 +1,37 @@
+# name|description
+onCombat|Default trigger: fires when the mob deals or takes damage, spawns, or dies
+onAttack|When the mob hits something
+onDamaged|When the mob is damaged
+onSpawn|When the mob spawns
+onDespawn|When the mob is despawned
+onReady|The first time a mob is spawned from a spawner
+onLoad|When the mob is loaded after a server restart
+onSpawnOrLoad|When the mob either spawns or loads
+onDeath|When the mob dies
+onTimer|Every # ticks (use ~onTimer:<ticks>)
+onInteract|When the mob is right-clicked
+onPlayerKill|When the mob kills a player
+onEnterCombat|When the mob enters combat (requires threat tables)
+onDropCombat|When the mob leaves combat (requires threat tables)
+onChangeTarget|When the mob changes targets (requires threat tables)
+onExplode|When the mob explodes (typically creepers)
+onPrime|When the creeper charges up for an explosion
+onCreeperCharge|When the creeper is charged (struck by lightning)
+onTeleport|When the mob teleports (typically endermen)
+onSignal|When the mob receives a signal
+onShoot|When the mob fires a projectile
+onBowHit|When the mob's fired projectile hits an entity
+onTame|When the mob gets tamed
+onBreed|When the mob breeds with another mob
+onTrade|When the villager completes a trade (requires Paper)
+onChangeWorld|When the mob changes world
+onBucket|When the cow is milked or an entity is bucketed (axolotl etc.)
+onSkillDamage|When the mob deals damage to other entities via a mechanic
+onHear|When the mob hears a sound (if hearing is enabled)
+onProjectileHit|When a mob's special projectile hits an entity
+onProjectileLand|When a mob's special projectile hits a block
+onDismounted|When the mob is dismounted from
+onCinematicStart|When a cinematic camera path begins playing on a player
+onCinematicEnd|When a cinematic camera path ends on a player (finish, cancel, quit, or death)
+onEnterBounds|When the mob moves into a defined region
+onExitBounds|When the mob moves out of a defined region

@@ -1,0 +1,68 @@
+# [goals] / [targets]   name|description
+[goals]
+arrowattack|A basic ranged attack that ranged entities can use
+arrowAttackConditional|Like arrowattack, but the mob only shoots while the target and mob match the given conditions
+bowattack|An advanced ranged attack that can make the shooter strafe backwards or clockwise
+bowAttackConditional|Like bowattack, but only shoots while the conditions match
+BreakDoor|Breaks down doors the mob runs into
+breed|Allows the mob to breed with other mobs
+CreeperSwell|Makes a creeper want to explode on its target
+crossbowattack|Attacks with a crossbow (only Piglins and Pillagers holding a crossbow)
+crossbowAttackConditional|Like crossbowAttack, but only shoots while the conditions match
+doNothing|Premium: stops the mob from doing anything based on conditions
+EatGrass|Makes the mob occasionally eat grass
+fleeConditional|Premium: makes the mob flee based on conditions
+fleeFaction|Makes the mob flee from a specific faction
+fleeGolems|Makes the mob flee from iron golems
+fleePlayers|Makes the mob flee from players
+fleeSun|Makes the mob flee from the sun and hide in shade
+fleeVillagers|Makes the mob flee from villagers
+fleeWolf|Makes the mob flee from wolves
+Float|Makes the mob swim in water or not
+FollowRoute|Makes the mob follow a specific path, one time only
+GoToLocation|Makes the mob go to a location (followrange must exceed the distance)
+goToLocationConditional|Makes the mob go to a location only while the conditions match; the location can use placeholders
+GoToOwner|Moves the mob towards its owner when beyond a distance (followrange must exceed the distance)
+GoToParent|Moves the mob towards its parent when beyond a distance (followrange must exceed the distance)
+gotospawn|Makes the mob travel to its original spawn location
+goToSpawnLocation|Makes the mob go to its spawn location
+Horrified|Run around frantically
+leapattarget|Makes the mob leap towards its target
+lookatplayers|Makes the mob look at nearby players
+LookAtTarget|Makes the mob look at its target
+meleeattack|Moves to and melee attacks the target
+meleeAttackConditional|Melee attacks the target only while it matches the conditions
+movethroughvillage|Finds a path through a village
+movetoblock|Moves towards the specified block type
+movetolava|Moves towards lava
+MoveTowardsRestriction|Moves towards the mob's restriction point (e.g. a villager's village)
+MoveTowardsTarget|Moves towards the target
+MoveTowardsTargetConditional|Paths to an entity that matches the conditions
+movetowater|Moves towards water
+MoveWithinDistanceOfTarget|Moves towards the target to be within a range
+MoveWithinDistanceOfTargetConditional|Like MoveWithinDistanceOfTarget, but only while the conditions match
+OpenDoor|Opens doors the mob runs into and closes them behind
+Panic|Panics when on fire and looks for water
+Patrol|Follows a route back and forth multiple times
+RandomFly|Flies around randomly
+RandomLookAround|Randomly looks around
+RandomNod|Randomly nods the head
+RandomStroll|Randomly walks around
+RestrictSun|Prevents the mob from entering sunlight
+SpiderAttack|Uses the attack a spider would
+ZombieAttack|Zombie melee attack
+[targets]
+HurtByTarget|Targets whatever attacks the mob
+IronGolems|Targets iron golems
+Monsters|Targets monsters
+nearestconditionaltarget|Targets based on conditions
+NearestOtherFaction|Targets any entity in a different faction
+NearestOtherFactionMonsters|Targets any monster in a different faction
+OwnerAttacker|Targets whatever attacks the mob's owner
+OwnerTarget|Targets whatever the mob's owner attacks
+ParentHurtBy|Targets the entity that attacks the mob's parent
+ParentTarget|Targets the entity being hit by the caster's parent
+Players|Targets players
+SpecificFaction|Targets a specific faction
+SpecificFactionMonsters|Targets monsters of a specific faction
+Villagers|Targets villagers

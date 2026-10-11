@@ -1,0 +1,196 @@
+# type|name|description   (type: entity location compare meta)
+entity|altitude|Tests how far above the ground the target entity is
+location|biome|Tests if the target is within the given list of biomes
+location|biometype|Tests the biome category at a location
+location|blocktype|Tests the material present at the target location
+location|blocktypeinradius|Counts specified blocks in a radius around the target location
+entity|blocking|Tests if the targeted player is blocking with a shield
+compare|boundingboxesoverlap|Checks if the caster's bounding box overlaps the target's
+meta|bowtension|Checks the bow tension of the shot that triggered the skill
+entity|burning|Whether the target entity is on fire
+meta|chance|The chance that the metaskill is executed
+entity|charged|Checks if the target creeper is charged
+entity|children|Tests how many children the caster has
+entity|color|Tests the entity's colors
+meta|comparevalues|Compares two values using a specified operation
+entity|crouching|Whether the target entity is crouching
+compare|cuboid|Whether the target is within the cuboid between location1 and location2
+meta|damageamount|Checks for a range of damage taken
+meta|damagecause|Checks the cause of the damage
+meta|damagetag|Checks the tags of the damage
+location|dawn|True at dawn (22000 to 2000 in-game time)
+location|day|True during the day (2000 to 10000 in-game time)
+location|dimension|Whether the target location is in a certain dimension
+entity|directionalvelocity|Whether the target has a velocity matching the given parameters
+compare|distance|Whether the caster-target distance is within the given range
+entity|distancefromlocation|Whether the distance between the target and a location is within a range
+location|distancefrompin|Checks if the target is within a distance of a pin
+location|distancefromspawn|Whether the distance from the world spawn to the target is within a range
+location|distancefromtrackedlocation|Whether the distance from the tracked location to the caster is within a range
+location|dusk|True at dusk (14000 to 18000 in-game time)
+entity|enchantingexperience|Checks the target player's experience points
+entity|enchantinglevel|Checks the target player's experience level
+location|enderdragonalive|Checks if an EnderDragon is alive in the world of the target location
+entity|enderdragonphase|Checks if the ender dragon is in the given phase(s)
+entity|entityitemissimilar|Tests if the target item entity is similar to another item
+entity|entityitemtype|Tests the type of the target item entity
+entity|entitymaterialtype|Tests the material of the target item entity
+entity|entitytype|Tests the entity type of the target
+entity|faction|Tests the target's faction
+entity|fallspeed|Whether the target's fall speed is within a range
+compare|fieldofview|Tests if the target is within an angle of where the caster is looking
+entity|foodlevel|Checks if the target's food level is within a range
+entity|foodsaturation|Checks if the target's saturation is within a range
+entity|gamemode|Checks the target player's gamemode
+entity|gliding|Whether the target is gliding
+entity|globalscore|Checks a global scoreboard value
+entity|hasai|Checks if the target entity has its AI enabled
+entity|hasaura|Checks if the target entity has the given aura
+entity|hasaurastacks|Tests if the target has a range of stacks from an aura
+entity|hasauratype|Checks if the target entity has the given aura type
+entity|hascurrency|Whether the target has an amount of Vault currency
+entity|hasdialogopen|Checks if the target player has a dialog open
+entity|hasenchantment|Checks if the target's equipped item has an enchantment
+entity|hasfreeinventoryslot|Checks if the evaluated entity has a free inventory slot
+entity|hasgravity|Tests if the target mob has gravity
+entity|hasitem|Tests if the target player has an amount of a material
+entity|hasoffhand|Checks if the target has something in the offhand
+entity|hasowner|Tests if the target mob has an owner
+entity|hasparent|Tests if the target mob has a parent
+entity|haspassenger|Checks if the target entity has a passenger
+entity|haspermission|Tests if the target player has a permission
+entity|haspotioneffect|Tests if the target entity has a potion effect
+entity|hastag|Tests if the target has a scoreboard tag
+entity|health|Matches the target's health
+entity|healthpercent|Matches the target's health percentage or multiplier
+location|height|Checks if the target's Y location is within a range
+location|heightabove|Checks if the target's Y location is above a value
+location|heightbelow|Checks if the target's Y location is below a value
+entity|holding|Checks if the target is holding a material (MythicMobs item or vanilla)
+compare|inbounds|Tests whether the target is inside an axis-aligned box between two corners
+location|inclaim|Checks if the target location is inside a claim
+entity|incombat|Checks if the target mob is considered in combat
+location|inpinregion|Checks if the target location is within a region delimited by two pins
+entity|isinvulnerable|Checks whether the target entity is invulnerable
+entity|isinsurvivalmode|Checks if the target player is in survival mode
+location|inside|Checks if the target has a block over their head
+entity|isbaby|Checks if the target entity is a baby
+meta|iscancelled|Checks if the triggering event is cancelled
+entity|iscaster|Checks if the target is the caster
+entity|ischild|Checks if the target is a child of the caster
+entity|isclimbing|Checks if the target entity is climbing
+entity|iscreeperprimed|Checks if the target creeper is primed to explode
+entity|isflying|Checks if the target player is flying
+entity|isfrozen|Checks if the target entity is frozen
+entity|isincinematic|Checks if the target player is in an active cinematic
+entity|isleashed|Checks if the target has been leashed
+entity|isliving|Checks if the target is a living entity
+entity|ismonster|Checks if the target is a monster
+entity|ismythicmob|Checks if the target is a MythicMob
+entity|isparentalive|Checks if the parent of the target entity is still alive
+compare|isparent|Checks if the target entity is the parent of the caster
+entity|isplayer|Checks if the target is a player
+entity|israiderpatrolleader|Checks if the target is the captain of a pillager group
+entity|issaddled|Checks if the target entity is saddled
+compare|issibling|Whether the target entity is a sibling of the caster
+meta|isskill|Checks whether the specified metaskill exists
+entity|istamed|Checks if the target entity is tamed
+entity|isusingspyglass|Checks if the target player is using a spyglass
+entity|itemgrouponcooldown|Checks whether the target player has an item group on cooldown
+entity|itemissimilar|Checks whether the targeted player's inventory slot item is similar to an item
+entity|itemrecharging|Checks if the target's weapon is recharging
+meta|itemtype|Checks the material of the item that triggered the skill
+entity|lastdamagecause|Checks the target's last damage cause
+entity|lastsignal|Matches the last signal received by the target mob
+entity|level|Checks the target MythicMob's level
+location|lightlevel|Tests the light level at the target location
+location|lightlevelfromblocks|Tests the light level from light-emitting blocks at the target location
+location|skylightlevel|Tests the sky light level at the target location
+compare|lineofsight|Tests if the target is within line of sight of the caster
+compare|lineofsightfromorigin|Tests if the target is within line of sight of the origin
+location|livinginradius|Matches a range to the number of living entities in a radius
+location|localdifficulty|Tests the difficulty scale at the target location
+entity|lookingat|Checks if the player is looking at something
+location|lunarphase|Checks the target world's lunar phase
+entity|materialisoncooldown|Checks if the target player's material is on cooldown
+meta|metaskillcondition|Casts a metaskill that determines whether the condition passes
+location|mobsinchunk|Matches a range to the number of mobs in the target's chunk
+location|mobsinradius|Checks how many mobs are in a given radius
+location|mobsinworld|Matches a range to the number of mobs in the target world
+meta|mobsnearorigin|Matches a range to the number of mobs around the origin
+entity|mobsize|Checks the size of an entity whose size can change
+location|moist|Checks if the target block of farmland is hydrated
+location|moisturelevel|Checks the moisture level of the target farmland block
+entity|motionx|Checks the X motion of the target entity against a range
+entity|motiony|Checks the Y motion of the target entity against a range
+entity|motionz|Checks the Z motion of the target entity against a range
+entity|mounted|Whether the target entity is riding a mount/vehicle
+entity|moving|Whether the target has a velocity greater than zero
+entity|mythicmobtype|Checks the MythicMob type of the target mob
+meta|mythicpack|Checks for the presence of a pack
+meta|mythicpackversion|Checks if a pack has a specified version
+meta|mythicpackversiongreater|Checks if a pack has a version greater than or equal to the specified one
+entity|name|Checks against the entity's name
+location|nearclaim|Whether the target location is near any GriefPrevention claim
+location|night|True at night (14000 to 22000 in-game time)
+location|notinregion|Whether the target location is not within the given WorldGuard region
+entity|offgcd|Checks if the target mob has no active global cooldown
+location|onblock|Matches the block the target entity is standing on
+entity|onground|Whether the target entity is standing on solid ground
+location|origindistancefrompin|Checks if the origin is within a distance of a pin
+meta|originlocation|Checks if the origin is at a given location
+location|outside|Whether the target has open sky above
+compare|owner|Checks if the target entity is the owner of the caster
+entity|ownerisonline|Checks if the target mob's owner (a player) is online
+entity|pitch|Checks if the pitch of the target entity is within a range
+entity|playerkills|Matches how many players the target mob has killed
+location|playernotwithin|Checks that no players are within a radius of the target
+location|playerwithin|Checks if any players are within a radius of the target
+entity|playersinradius|Checks how many players are in a radius
+meta|playersinworld|Matches the number of players in the caster's world
+meta|playersonline|Matches the number of players online
+meta|plugin|Checks if the specified plugin is running on the server
+meta|premium|Checks if MythicMobs Premium is running
+meta|projectilehasended|Checks if the calling projectile has ended
+location|raining|Whether it is raining in the target world
+location|region|Whether the target is within the given WorldGuard region
+entity|samefaction|Tests if the caster and target are in the same faction
+entity|score|Checks a scoreboard value of the target entity
+meta|serverispaper|Checks whether the server runs a fork of Paper
+meta|servernmsversion|Checks the server's NMS version
+meta|serverversion|Checks the server's Minecraft version
+meta|serverversionafterorequal|Checks whether the server is at or after a version
+meta|serverversionbefore|Checks whether the server is before a version
+entity|size|Checks the size of the target entity
+entity|skilloncooldown|Checks if the given skill is on cooldown for the target
+entity|spawnreason|Checks against the spawn reason of the target
+entity|sprinting|Checks if the target player is sprinting
+entity|stance|Checks the stance of the target mob
+meta|statdamagemodifier|Used in stat triggers to check the increased damage (as a multiplier)
+meta|stringempty|Checks if the provided string is empty
+meta|stringnotempty|Checks if the provided string is not empty
+meta|stringequals|Checks if value1 equals value2 (variables and placeholders allowed)
+location|structure|Matches if the target location is inside a structure
+location|sunny|Whether the weather is sunny in the target world
+entity|targetinlineofsight|Tests if the target has line of sight to its own target
+entity|targetnotinlineofsight|Tests if the target has no line of sight to its own target
+entity|targetwithin|Tests if the target's target is within a distance
+entity|targetnotwithin|Tests if the target's target is not within a distance
+meta|targets|Tests if the number of inherited targets matches a range
+entity|templatetype|Checks if the target mob extends the specified template
+location|thundering|Whether it is thundering in the target world
+meta|triggerblocktype|Checks the block material that triggered the skill
+meta|triggeritemtype|Checks the item material that triggered the skill
+meta|variablecontains|Checks if the given variable contains a value
+meta|variableequals|Checks if the given variable has a particular value
+meta|variableinrange|Checks if the given numeric variable is within a range
+meta|variableisset|Checks if the given variable is set
+entity|vehicleisdead|Checks if the caster's mounted vehicle is dead
+entity|velocity|Checks the velocity of the target entity against a range
+entity|wearing|Tests what the target entity has equipped
+location|world|Checks the name of the target world
+location|worldtime|Matches a range against the target world's time
+entity|yaw|Checks the yaw of the target entity against a range
+entity|xdiff|Checks the X difference between the target entity and the caster
+entity|ydiff|Checks the Y difference between the target entity and the caster
+entity|zdiff|Checks the Z difference between the target entity and the caster

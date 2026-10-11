@@ -1,0 +1,107 @@
+# ---------------------------------------------------------------------------
+# MythicEditor configuration
+# ---------------------------------------------------------------------------
+web:
+  # Address the embedded web server binds to. Use 127.0.0.1 when a reverse proxy
+  # (nginx / Caddy) terminates TLS in front of MythicEditor.
+  bind-address: "0.0.0.0"
+  port: 8765
+  # Public base URL used in the chat link, e.g. "https://editor.example.com".
+  # Empty = http://<server-ip>:<port>. PLAIN HTTP IS NOT ENCRYPTED: put the editor
+  # behind HTTPS whenever players connect over the internet.
+  public-url: ""
+  max-request-bytes: 2097152
+  threads: 8
+
+# ---------------------------------------------------------------------------
+# Relay mode (no open port needed): the plugin connects OUT to your Cloudflare Worker
+# (see relay-worker/README.md) and the Worker forwards browser requests to it.
+# With relay on, /mythiceditor prints links on the Worker's address.
+# ---------------------------------------------------------------------------
+relay:
+  enabled: false
+  # Address of your Worker, e.g. "https://mythiceditor.mythic-editor.workers.dev"
+  url: ""
+  # Long random value. Must be exactly the same as the Worker's RELAY_SECRET.
+  secret: ""
+  # AUTOMATIC SETUP (no wrangler needed): paste a Cloudflare API token here and leave url/secret empty.
+  # Create it at dash.cloudflare.com -> My Profile -> API Tokens -> "Edit Cloudflare Workers" template.
+  # On startup the plugin deploys the Worker it carries into your account, generates the secret and saves
+  # url + secret in relay.json. Remove the token afterwards. When the plugin is updated and its Worker changed,
+  # put the token back once to update the Worker as well.
+  api-token: ""
+  # Only if the token can see several Cloudflare accounts.
+  account-id: ""
+  # Name of the Worker (its address becomes https://<name>.<your-subdomain>.workers.dev).
+  worker-name: "mythiceditor"
+  # FRIENDS' SERVERS on the same Worker (set this on YOUR server only): list their names, e.g. ["friend", "bob"].
+  # On startup the console prints the 4 config lines each friend has to paste into their own config.yml
+  # (no wrangler / Node needed on their side). Remove a name here and change the name they use to lock them out.
+  friends: []
+  # Only when SEVERAL servers share one Worker: this server's name (a-z, 0-9, "-", e.g. "friend").
+  # Leave empty for the Worker owner's own server. The secret above must then be the one that
+  # `node make-secret.js <RELAY_SECRET> <server-id>` prints. Links become <url>/s/<server-id>/editor/<ticket>.
+  server-id: ""
+
+session:
+  ttl-minutes: 60              # idle timeout (sliding)
+  max-lifetime-minutes: 480    # hard limit
+  ticket-ttl-seconds: 300      # how long the URL from /mythiceditor stays valid
+  single-use-ticket: true      # the URL can be opened once; the browser then holds a cookie
+  invalidate-on-quit: true     # end web sessions when the player leaves the server
+  max-sessions-per-player: 2
+
+security:
+  rate-limit:
+    api-per-minute: 900
+    write-per-minute: 60
+    # Applies to opening /mythiceditor links and to requests without a login, per client address.
+    login-per-minute: 20
+  # Extra Origin values accepted for write requests (only needed behind unusual proxies)
+  allowed-origins: []
+  # Believe X-Forwarded-For / X-Forwarded-Proto. Only honoured for connections that come from THIS machine
+  # (a reverse proxy or tunnel client such as nginx, Caddy, cloudflared or `ssh -R ... localhost.run`), so it is
+  # safe with bind-address 127.0.0.1. Turn it on behind such a proxy; it marks the login cookie "Secure" and makes
+  # rate limiting use the real client address.
+  trust-proxy-headers: false
+  # Send a Content-Security-Policy header. If the editor page ever stays blank, set this to false and report the
+  # browser console error.
+  csp: true
+  # Mechanics that run server commands. Players with mythiceditor.edit but WITHOUT mythiceditor.unrestricted
+  # cannot add new lines using them (lines that already exist can stay). This is a deny-list, not a sandbox:
+  # only give mythiceditor.edit to people you would trust with console access. [] switches the check off.
+  restricted-mechanics: ["command", "cmd", "consolecommand", "playercommand", "runcommand", "executecommand"]
+
+mythicmobs:
+  # Empty = use the data folder of the installed MythicMobs plugin.
+  folder: ""
+  # Folders (relative to the MythicMobs folder) that are indexed per content type.
+  # "*" matches one directory level (e.g. Packs/<pack>/Mobs). Nothing outside these
+  # folders can ever be read or written by the editor.
+  paths:
+    mobs: ["Mobs", "Packs/*/Mobs"]
+    skills: ["Skills", "Packs/*/Skills"]
+    items: ["Items", "Packs/*/Items"]
+    droptables: ["Droptables", "Packs/*/Droptables"]
+  # Content types that may be created/edited/deleted (the rest are index/completion only)
+  editable: ["mobs", "skills"]
+  reload-on-save: false
+  reload-command: "mythicmobs reload"
+
+storage:
+  # Relative to the MythicMobs folder. A timestamped copy is written before every change.
+  backup-dir: "backups"
+  backup-retention: 200        # keep the newest N backup sets
+  default-skill-file: "Skills/MythicEditor.yml"
+  default-mob-file: "Mobs/MythicEditor.yml"
+
+index:
+  watch: true                  # react to file changes made outside of the editor
+  rescan-seconds: 30           # safety-net full rescan (mtime/size based)
+
+editor:
+  autosave: false              # safe default; users can enable it in the UI
+  autosave-delay-ms: 3000
+
+logging:
+  debug: false

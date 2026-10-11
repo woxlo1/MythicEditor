@@ -1,0 +1,303 @@
+# cat|name|description   (cat: combat effect item message mob movement skill utility variable block player ai score aura projectile display)
+block|activatespawner|Activates a MythicMobs spawner at the targeted location
+mob|addtrade|Changes the trades of a villager
+display|animatearmorstand|Animates an armor stand
+player|armanimation|Makes the caster swing their arm
+projectile|arrowvolley|Fires a volley of arrows
+mob|attribute|Sets an attribute on the target entity, if attributable
+mob|attributemodifier|Adds an attribute modifier to the attributable target
+aura|aura|Applies an aura to the target, running onStart/onTick/onEnd/etc. skills that originate from the target
+aura|auraremove|Removes an aura from the target entity
+display|barcreate|Creates a custom boss bar on the casting mob
+display|barremove|Removes a custom boss bar on the casting mob
+display|barset|Modifies a custom boss bar on the casting mob
+effect|blackscreen|Blacks out the target's screen for the duration
+block|blockdestabilize|Makes the targeted blocks fall as if affected by gravity
+block|blockmask|Temporarily masks a block as a different block
+block|blockunmask|Unmasks blocks that have been masked
+block|blockphysics|Triggers a block physics update at the target location
+block|blockwave|Creates a wave of blocks at the target location
+effect|bloodyscreen|Makes the target's screen glow red
+block|bonemeal|Applies a bone meal effect to the target blocks
+combat|bossborder|Creates an inescapable border around the mob
+aura|bouncy|Applies an aura that makes the target bouncy
+block|breakblock|Breaks the block at the target location
+block|breakblockandgiveitem|Breaks the block at the target location and gives an item/droptable
+player|clearexperience|Clears the experience of the targeted players
+player|clearexperiencelevels|Clears the experience levels of the targeted players
+mob|cleartarget|Forces the target of the mechanic to reset its current target
+player|giveexperiencelevels|Gives experience levels to the targeted players
+player|takeexperiencelevels|Takes experience levels from the targeted players
+player|closeinventory|Closes the target player's inventory
+utility|command|Executes a command for each target
+combat|consume|Deals damage and restores health per target hit
+item|consumeslot|Removes an item from a specific slot of the player's inventory
+movement|directionalvelocity|Changes the target's velocity along a specific vector
+movement|disengage|Makes the caster leap backwards away from the target entity
+mob|disguise|Changes the caster's disguise
+mob|disguisemodify|Modifies the caster's already applied disguise
+mob|disguisetarget|Changes the target's disguise
+mob|undisguise|Removes the caster's disguise
+movement|dismount|Makes the caster dismount whatever it is riding
+display|displaytransformation|Sets the targeted display entity's transformations
+combat|clearthreat|Makes a mob clear its threat table
+player|currencygive|Gives money to a player (requires Vault and a currency plugin)
+player|currencytake|Takes money from a player (requires Vault and a currency plugin)
+combat|damage|Damages the target for an amount
+combat|basedamage|Damages the target for a percent of the mob's damage stat
+combat|percentdamage|Damages the target for a percent of their health
+item|decapitate|Drops a player head item based on the target
+mob|doppleganger|Copies the appearance of the target player
+item|dropitem|Drops an item or droptable at the target location
+movement|ejectpassenger|Ejects anything riding the caster
+effect|ender|Causes the "Ender" effect
+effect|enderbeam|Creates an end crystal beam effect to the target
+mob|enderdragonresetcrystals|Generates the EnderDragon crystals
+mob|enderdragonsetphase|Sets the EnderDragon phase
+mob|enderdragonsetrespawnphase|Sets the EnderDragon respawn phase
+mob|enderdragonspawnportal|Generates the portal of the EnderDragon battle
+item|equip|Makes the casting mob equip an item
+item|equipcopy|Makes the caster equip a copy of the target's equipment
+combat|explosion|Causes an explosion
+effect|fakeexplosion|Causes a fake explosion
+combat|extinguish|Removes fire ticks from the target entity
+effect|fakelightning|Strikes a fake lightning at the target
+block|fawepaste|Pastes a schematic using FAWE (Fast Async WorldEdit)
+aura|fear|Applies an aura that makes the target run around in fear
+player|feed|Feeds the target player
+block|fillchest|Fills a chest with items or a droptable
+effect|firework|Creates a firework effect at the target
+effect|flames|Creates the flames effect at the targeter's location
+aura|fly|Applies an aura that allows the targeted player to fly
+aura|followpath|Applies an aura that makes the mob follow a path
+movement|forcepull|Teleports the target to the caster
+skill|foreach|Executes a metaskill once for each target of the mechanic
+skill|foreachpin|Executes a metaskill once for each pin of a multi-pin
+skill|foreachvalue|Executes a metaskill once for each entry or key-value pair in the specified value
+aura|formline|Applies an aura that makes the mob follow a straight path
+combat|freeze|Freezes the target for the given number of ticks (powdered snow freezing effect)
+effect|geyser|Creates a geyser of water or lava
+item|giveitem|Gives an item to the target
+item|giveitemfromslot|Gives the target the item in the given slot of the caster
+item|giveitemfromtarget|Gives the caster an item with the pickup animation from the target entity or location
+effect|glow|Makes the target glow
+mob|goatram|Makes the casting goat ram the targeted entity
+movement|goto|Moves toward the location of the targeter (entity or location)
+effect|guardianbeam|Draws a guardian beam between the origin and the target
+combat|heal|Heals the target
+combat|healpercent|Heals the target for a percentage of its max health
+effect|hide|Hides the caster from the targeted players for a set duration
+combat|hit|Simulates a physical hit from the mob
+display|hologram|Summons a hologram at the targeted location
+combat|ignite|Sets the target on fire
+effect|itemspray|Causes an explosion of temporary items at the target location
+message|jsonmessage|Sends a JSON-format message to the target players
+movement|jump|Makes the caster jump
+movement|leap|Makes the caster leap towards the target
+combat|lightning|Strikes lightning at the target
+utility|log|Logs a message to the console
+movement|look|Makes the caster look at the target
+movement|lunge|Makes the caster lunge forward at the target
+movement|matchrotation|Sets the caster's yaw and pitch to the target's
+message|message|Sends a message to the target players
+combat|modifydamage|Modifies the damage event that triggered the skill
+score|modifyglobalscore|Modifies a scoreboard value of the fake player __GLOBAL__
+score|modifytargetscore|Modifies a scoreboard value of the target
+score|modifymobscore|Modifies a scoreboard value of the casting mob
+score|modifyscore|Modifies the score of a dummy player
+mob|mount|Summons a mob for the caster and mounts it
+mob|mountme|Forces the targeted entity to mount the caster
+mob|mounttarget|Mounts the target
+utility|movepin|Moves the given pin to the target location
+player|opencustommenu|Opens a custom menu
+mob|opentrades|Opens the trades of the casting villager to the target player
+player|oxygen|Gives oxygen to a player target
+effect|particle|Creates particle effects around the target
+effect|particlebox|Draws a box of particles around the target
+effect|particleequation|Generates particles based on equations
+effect|particleline|Draws a line of particles to the target
+effect|particlelinehelix|Draws a line-based helix effect
+effect|particlelinering|Draws a particle ring connected by lines
+effect|particleorbital|Draws orbiting particle effects around the target
+effect|particlering|Draws a ring of particles around the target
+effect|particlesphere|Draws a sphere of particles around the target
+effect|particletornado|Draws a persistent tornado of particles at the target
+effect|atom|Creates particles in the shape of an atom
+item|pickupitem|Picks up the targeted item
+effect|playanimation|Forces the entity to play an animation
+effect|playblockbreaksound|Plays a block breaking sound
+effect|playblockfallsound|Plays a block falling sound
+effect|playblockhitsound|Plays a block hit sound
+effect|playblockplacesound|Plays a block place sound
+effect|playblockstepsound|Plays a block step sound
+display|posearmorstand|Changes the pose of the target armor stand
+combat|potion|Applies a potion effect to the target
+combat|potionclear|Removes all potion effects from the target entity
+combat|prison|Imprisons the target inside a block
+utility|printparenttree|Prints debug information about the executing metaskill and its skill tree
+movement|propel|Propels the caster towards the target
+movement|pull|Pulls the target towards the mob
+block|pushblock|Pushes the block at the target location in the given direction
+block|pushbutton|Pushes a button at the target location
+utility|raytrace|Traces a straight line to the target
+utility|raytraceto|Executes a skill with the result of a raytrace to the target location
+mob|rally|Makes other nearby mobs attack the target
+message|randommessage|Sends a random message to the target player
+effect|recoil|Kicks the target's screen to simulate a recoil
+mob|remount|Remounts the mob the caster originally spawned riding, if still alive
+mob|remove|Removes the target mob
+item|removehelditem|Removes some of the item the target player is holding
+mob|removeowner|Removes the ownership of the target mob
+utility|addtag|Adds a scoreboard tag to the target
+utility|removetag|Removes a scoreboard tag from the target
+ai|resetai|Attempts to reset the caster's AI to the base type's default
+movement|rotatetowards|Rotates the caster towards the target location
+ai|runaigoalselector|Changes the caster's AIGoalSelectors
+ai|runaitargetselector|Changes the caster's AITargetSelectors
+mob|saddle|Equips or removes a saddle on the target entity
+message|sendactionmessage|Sends an actionbar message to the target player
+player|sendresourcepack|Sends a resource pack to the target player
+message|sendtitle|Sends a title/subtitle message to the target player
+message|sendtoast|Sends an achievement toast to the target player
+ai|setai|Disables/enables the AI of the target mob
+block|setblockopen|Sets the target block's open state
+block|setblocktype|Changes the block type at the target location
+block|setchunkforceloaded|Sets the force-loaded status of a location's chunk
+mob|setcollidable|Sets whether the target has a collidable hitbox
+player|setcustommenubutton|Sets a slot of the opened custom menu to the specified button
+display|setdisplayentityitem|Sets the item of ITEM_DISPLAY entities
+mob|setdragonpodium|Sets the position of the dragon's podium at the target location
+mob|setfaction|Changes the target entity's faction
+player|setflying|Sets whether the target player is flying
+player|setgamemode|Sets the game mode of the target player
+player|setgliding|Makes the target glide if they have an elytra
+score|setglobalscore|Sets a scoreboard value on the fake player __GLOBAL__
+movement|setgravity|Sets whether gravity affects the target entity
+combat|sethealth|Sets the health of the target entity
+display|setinteractionsize|Sets the size of the target INTERACTION entity
+player|setitemgroupcooldown|Sets the cooldown of an item group for the target player
+mob|setleashholder|Changes the holder of a mob's lead
+mob|setlevel|Changes the casting mob's level
+player|setmaterialcooldown|Sets a cooldown for usable materials such as ender pearls or chorus fruit
+combat|setmaxhealth|Sets the max health of the target entity
+mob|setmobcolor|Changes the color of the target if it is a colorable mob
+score|setmobscore|Sets a scoreboard value on the casting mob
+mob|setname|Changes the caster entity's name
+mob|setraidercanjoinraid|Sets whether the target raider can join a raid
+mob|setraiderpatrolblock|Sets the target raider to patrol a location
+mob|setraiderpatrolleader|Sets the raider patrol leader
+combat|setnodamageticks|Sets the no-damage ticks of the target
+mob|setowner|Makes the target the owner of the casting mob
+mob|setparent|Makes the target the parent of the casting mob
+ai|setpathfindingmalus|Sets the pathfinding malus of a mob for given terrain types
+movement|setpitch|Sets the head pitch of the target entity
+mob|setpose|Sets the entity's pose
+movement|setrotation|Sets the rotation of the target
+mob|settarget|Sets the caster's target
+score|settargetscore|Sets the score of the target
+display|settextdisplay|Sets the text of the target Text Display entity
+mob|settonguetarget|Sets the tongue target of a frog caster to the target entity
+score|setscore|Sets the scoreboard value of a dummy player
+movement|setspeed|Sets the target entity's speed attribute
+mob|setstance|Sets the stance of the target mob
+combat|shield|Applies an absorb shield to the target entity
+combat|shieldbreak|Forces the player to lower their shield and puts it on cooldown
+combat|shieldpercent|Applies an absorb shield for a percentage of the target's max health
+projectile|shootfireball|Shoots a fireball at the target
+projectile|shootpotion|Throws a potion at the target
+projectile|shootskull|Shoots a wither skull at the target
+projectile|shootshulkerbullet|Shoots a shulker bullet at the target entity
+player|showdialog|Shows a dialog (interactive Paper Dialog API window) to the target player
+effect|showentity|Shows the hidden caster to the targeted players
+mob|signal|Sends a signal to a mob
+effect|skybox|Alters the target player's skybox
+effect|smoke|Creates a puff of smoke
+effect|smokeswirl|Creates a persistent swirl of smoke
+effect|sound|Plays a sound from vanilla Minecraft or a resource pack
+item|stealitem|Steals an item from the target and puts it in the mob's hand
+effect|stopsound|Stops a sound from playing
+message|speak|Makes the mob speak in chat, with options for speech bubbles
+movement|spin|Makes the target spin
+block|spring|Creates a temporary spring of liquid at the target
+aura|stun|Applies an aura that stuns the target entity
+item|stopusingitem|Stops the targeted entity from using an item
+combat|suicide|Makes the caster die
+mob|summon|Summons other mobs at the target
+effect|summonareaeffectcloud|Summons a cloud of particles at the target
+block|summonfallingblock|Summons a falling block
+mob|summonpassenger|Summons a mob to ride the target
+movement|swap|Swaps locations with the target
+player|swingoffhand|Makes the casting player swing their offhand
+item|takeitem|Removes an item from the targeted player's inventory
+combat|taunt|Modifies the threat the caster holds with the target entities
+movement|teleport|Teleports to the target
+movement|teleporty|Teleports the caster vertically
+movement|teleportin|Teleports the target relative to the caster's yaw
+movement|teleportto|Teleports the target to a specified location
+utility|time|Changes the time
+combat|threat|Modifies the mob's threat towards the target
+movement|throw|Throws the target entity
+effect|thunderlevel|Creates a client-side, per-player rainless storm
+block|togglelever|Toggles a lever at the target location
+block|togglepiston|Toggles a piston at the target location
+mob|togglesitting|Toggles the sitting state of cats, dogs, foxes and parrots
+effect|totemofundying|Plays the effect of a player resurrecting
+utility|tracklocation|Sets the mob's tracked location to the targeted location
+block|undopaste|Undoes a previously made paste
+movement|velocity|Modifies the velocity of the target entities
+utility|weather|Modifies the weather in the target world
+mob|wolfsit|Forces a targeted wolf to sit
+block|worldeditreplace|Replaces blocks in a region using WorldEdit
+skill|skill|Executes a metaskill
+skill|variableskill|Executes a metaskill (supports placeholders)
+effect|beam|Creates a beam of a material between the caster and the target
+skill|cancelevent|Cancels the event that triggered the current skill tree (only works for certain triggers)
+skill|cancelskill|Cancels the execution of the metaskill
+aura|cast|Applies an aura that casts a metaskill using various advanced options
+skill|chain|Chains a skill between multiple targets that are near each other
+projectile|chainmissile|A missile that chains between entities (Premium only)
+skill|delay|Delays execution of the current skill list by a number of ticks
+skill|determinecondition|Determines the outcome of a metaskill used as a condition via MetaskillCondition
+projectile|endprojectile|Terminates the projectile (only usable in projectile mechanics)
+skill|globalcooldown|Sets the caster's global cooldown timer
+projectile|missile|Fires a homing projectile towards the target
+projectile|modifyprojectile|Modifies the projectile / missile / orbital
+aura|onattack|Applies an aura that triggers skills when the target attacks
+aura|ondamaged|Applies an aura that triggers skills when the target takes damage
+aura|onshoot|Applies an aura that triggers skills when the target shoots a bow
+aura|onblockbreak|Applies an aura that triggers skills when the target breaks a block
+aura|onblockplace|Applies an aura that triggers skills when the target places a block
+aura|onchat|Applies an aura that triggers skills when the target chats
+aura|onswing|Applies an aura that triggers skills when the target swings / left clicks
+aura|oninteract|Applies an aura that triggers skills when the target right-clicks while holding a block or looking at an outlined block (not air)
+aura|onjump|Applies an aura that triggers a skill when the target jumps (Paper only)
+aura|ondeath|Applies an aura that triggers a skill when the target dies
+aura|onkeypress|Applies an aura that triggers a skill when the player presses a key
+aura|onkeyrelease|Applies an aura that triggers a skill when the player releases a key
+projectile|orbital|Applies an aura that makes a projectile orbit around the target
+skill|polygon|Creates a customizable polygon-shaped pattern that can execute metaskills
+projectile|projectile|Fires a highly customizable projectile towards the target
+projectile|projectilevelocity|Modifies the velocity of the calling projectile or missile
+skill|randomskill|Executes a random skill from a list
+skill|setskillcooldown|Sets the given metaskill's cooldown to the given value
+projectile|setprojectiledirection|Sets the calling projectile's movement direction to the given target
+projectile|setprojectilebulletmodel|Sets the model of the projectile (DISPLAY bullets only)
+projectile|shoot|Shoots an item projectile at the target, similar to arrows/eggs/snowballs
+skill|slash|Creates a customizable slash pattern that can execute metaskills
+skill|sudoskill|Makes the target execute a skill
+skill|switch|Acts as a switch/case
+aura|stataura|Applies an aura that applies a specific stat to the target
+skill|totem|Creates a static totem at a location that can execute other skills
+aura|terminable|Creates an aura that cancels its onStart metaskill if some conditions are met
+projectile|volley|Shoots a volley of item projectiles at the target with various options
+variable|variableadd|Adds an amount to a numeric variable
+variable|variablemath|Performs math on a numeric variable
+variable|setvariable|Sets the value of a variable
+variable|setvariablelocation|Sets a variable to the target location
+variable|variableunset|Unsets the variable
+variable|variablesubtract|Subtracts an amount from a numeric variable
+variable|variablemove|Moves an existing variable across names and/or registries
+skill|wait|Puts the metaskill on hold until a set of conditions is met
+player|cinematiccamera|Plays a cinematic camera path for the target player
+player|cinematiccancel|Cancels an active cinematic for the target player
+player|closedialog|Closes any open dialog for the target player

@@ -1,0 +1,28 @@
+name: MythicEditor
+version: '${version}'
+main: dev.mythiceditor.MythicEditorPlugin
+api-version: '1.21'
+description: Web based IDE for MythicMobs Skills and Mobs
+depend: [MythicMobs]
+commands:
+  mythiceditor:
+    description: Open the MythicEditor web IDE
+    usage: /<command> [open|reload|sessions|revoke]
+    aliases: [meditor]
+    permission: mythiceditor.use
+permissions:
+  mythiceditor.use:
+    description: Open MythicEditor and browse Skills/Mobs
+    default: op
+  mythiceditor.edit:
+    description: Create, edit, duplicate and delete Skills/Mobs (powerful - only for people you trust)
+    default: op
+  mythiceditor.reload:
+    description: Trigger a MythicMobs reload from the editor
+    default: op
+  mythiceditor.admin:
+    description: Reload MythicEditor config, list and revoke sessions
+    default: op
+  mythiceditor.unrestricted:
+    description: Add command-running mechanics (command, cmd, ...) to Skills/Mobs. Equivalent to console access - give it sparingly
+    default: op
