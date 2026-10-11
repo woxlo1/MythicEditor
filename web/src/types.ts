@@ -122,6 +122,12 @@ export interface Catalog {
   aiGoals: CatalogNamed[];
   aiTargets: CatalogNamed[];
   placeholders: CatalogNamed[];
+  /** attributes accepted by every mechanic (cooldown, delay, repeat, chance, ...) */
+  mechanicAttributes?: CatalogParam[];
+  /** attributes accepted by every targeter (targetconditions, fallback, ...) */
+  targeterAttributes?: CatalogParam[];
+  conditionActions?: CatalogNamed[];
+  colorCodes?: CatalogNamed[];
   enums: Record<string, string[]>;
 }
 

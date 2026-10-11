@@ -132,6 +132,66 @@ print("triggers:"); trig, trig_new = merge_section(base["triggers"], trig_docs)
 # existing triggers have no 'params'; drop empty params/main from trigger entries
 for t in trig: t.pop("params", None); t.pop("main", None)
 
+
+# ---------------------------------------------------------------- scraped parameters (scrape_wiki.py)
+RICH_PLAIN = ("string", "string!")
+
+def spec_names(spec):
+    return [n.strip() for n in spec.split("|", 1)[0].split(",") if n.strip()]
+
+def merge_params(entry, scraped):
+    """Wiki parameter tables are authoritative for *which* parameters exist and their names/aliases/defaults.
+    The hand-written base entry keeps authority over richer typing (enum:/skill/mob/required...), because a
+    scraper can only guess those. Base-only parameters (not on the wiki page) are kept, never dropped."""
+    base = list(entry.get("params") or [])
+    base_by_name = {}
+    for b in base:
+        for n in spec_names(b):
+            base_by_name[n.lower()] = b
+    out, used = [], set()
+    for w in scraped["params"]:
+        wn = spec_names(w)
+        b = next((base_by_name[n.lower()] for n in wn if n.lower() in base_by_name), None)
+        wparts = w.split("|", 3)
+        if b is None:
+            out.append(w); continue
+        used.add(id(b))
+        bparts = b.split("|", 3)
+        names, _seen = [], set()                                    # wiki order first, then base-only aliases (case-insensitive)
+        for n in wn + spec_names(b):
+            if n.lower() not in _seen:
+                _seen.add(n.lower()); names.append(n)
+        typ = bparts[1] if bparts[1] not in RICH_PLAIN or bparts[1].endswith("!") else wparts[1]
+        if bparts[1] in RICH_PLAIN and bparts[1] != "string!": typ = wparts[1]
+        default = wparts[2] if wparts[2] else bparts[2]
+        desc = wparts[3] if wparts[3] else bparts[3]
+        out.append(f"{','.join(names)}|{typ}|{default}|{desc}")
+    for b in base:
+        if id(b) not in used and not any(set(map(str.lower, spec_names(b))) & set(map(str.lower, spec_names(o))) for o in out):
+            out.append(b)
+    entry["params"] = out
+    if not entry.get("main"):
+        entry["main"] = [m for m in scraped.get("main", []) if any(m.lower() == n.lower() for o in out for n in spec_names(o))]
+    for a in scraped.get("aliases", []):
+        add_alias(entry, a)
+
+def apply_scraped(entries, kind):
+    f = HERE / "data" / "params" / f"{kind}.json"
+    if not f.exists():
+        return 0
+    scraped = json.loads(f.read_text(encoding="utf-8"))
+    n = 0
+    for e in entries:
+        hit = next((scraped[k.lower()] for k in [e["name"], *e["aliases"]] if k.lower() in scraped), None)
+        if hit:
+            merge_params(e, hit); n += 1
+    print(f"  parameters merged from data/params/{kind}.json: {n} entries, {sum(len(v['params']) for v in scraped.values())} parameters")
+    return n
+
+print("scraped parameters:")
+for _kind, _entries in (("mechanics", mech), ("conditions", cond), ("targeters", targ)):
+    apply_scraped(_entries, _kind)
+
 # ---------------------------------------------------------------- named lists (AI, placeholders)
 def named_merge(base_list, docs, doc_base, exempt=()):
     out = copy.deepcopy(base_list); idx = {e["name"].lower(): e for e in out}; hit = set()

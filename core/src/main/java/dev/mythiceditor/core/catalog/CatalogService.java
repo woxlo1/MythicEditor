@@ -189,6 +189,17 @@ public final class CatalogService {
             for (JsonElement e : arr(root, section)) list.add(Json.parse(e.toString()).getAsJsonObject().asMap());
             out.put(section, list);
         }
+        // attributes shared by every mechanic / targeter, in the same compact "names|type|default|desc" format
+        for (String section : List.of("mechanicAttributes", "targeterAttributes")) {
+            List<Map<String, Object>> list = new ArrayList<>();
+            for (JsonElement e : arr(root, section)) list.add(parseParam(e.getAsString()));
+            out.put(section, list);
+        }
+        for (String section : List.of("conditionActions", "colorCodes")) {
+            List<Object> list = new ArrayList<>();
+            for (JsonElement e : arr(root, section)) list.add(Json.parse(e.toString()).getAsJsonObject().asMap());
+            out.put(section, list);
+        }
         Map<String, Object> enums = new LinkedHashMap<>();
         if (root.has("enums")) {
             for (Map.Entry<String, JsonElement> e : root.getAsJsonObject("enums").entrySet()) {

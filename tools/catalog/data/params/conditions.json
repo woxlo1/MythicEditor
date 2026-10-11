@@ -1,0 +1,29 @@
+{
+ "health": {
+  "name": "health",
+  "url": "https://wiki.mythiccraft.io/mythicmobs/Skills/Conditions/health",
+  "aliases": [
+   "hp"
+  ],
+  "params": [
+   "health,h,amount,a|number|0|The health range to check for",
+   "includeabsorption,ia|boolean|false|Whether any absorption-related health should be factor into the calculation"
+  ],
+  "main": [
+   "health"
+  ]
+ },
+ "damageamount": {
+  "name": "damageAmount",
+  "url": "https://wiki.mythiccraft.io/mythicmobs/skills/conditions/DamageAmount",
+  "aliases": [],
+  "params": [
+   "damageAmount,amount,a|string|>0|Range of damage to check for"
+  ],
+  "main": [
+   "damageamount"
+  ],
+  "verification": "manual_verified_from_official_search_result",
+  "verifiedAt": "2026-10-11T00:00:00Z"
+ }
+}

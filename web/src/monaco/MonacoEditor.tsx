@@ -57,7 +57,14 @@ export function MonacoEditor(props: MonacoEditorProps) {
       quickSuggestions: { other: true, comments: false, strings: true },
       suggestOnTriggerCharacters: true,
       tabCompletion: "on",
-      snippetSuggestions: "inline"
+      snippetSuggestions: "inline",
+      // Only offer MythicMobs-aware candidates: words scraped from the open document are noise here.
+      wordBasedSuggestions: "off",
+      quickSuggestionsDelay: 0,
+      // Tab and Enter both accept the highlighted candidate; the best match (e.g. "dama" -> damage) is pre-selected.
+      acceptSuggestionOnEnter: "on",
+      suggestSelection: "first",
+      suggest: { showWords: false, preview: true, showIcons: true, filterGraceful: true, insertMode: "replace", snippetsPreventQuickSuggestions: false }
     });
     editorRef.current = editor;
     propsRef.current.onReady?.(editor);

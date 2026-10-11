@@ -58,4 +58,32 @@ class CatalogServiceTest {
         c.applyRuntime(new RuntimeCatalog("5.9.1", List.of(), List.of(), List.of(), Map.of()));
         assertNotEquals(e1, c.etag(), "a detected MythicMobs version should change the ETag");
     }
+
+    @Test
+    void exposesAttributesSharedByAllMechanicsAndTargeters() {
+        com.google.gson.JsonObject root = com.google.gson.JsonParser.parseString(new CatalogService().json()).getAsJsonObject();
+        for (String section : List.of("mechanicAttributes", "targeterAttributes")) {
+            assertTrue(root.has(section), section + " must reach the web client (it feeds the {...} completion)");
+            assertTrue(root.getAsJsonArray(section).size() > 0, section);
+        }
+        boolean cooldown = false;
+        for (com.google.gson.JsonElement e : root.getAsJsonArray("mechanicAttributes")) {
+            for (com.google.gson.JsonElement n : e.getAsJsonObject().getAsJsonArray("names")) cooldown |= n.getAsString().equals("cooldown");
+        }
+        assertTrue(cooldown, "cooldown is accepted by every mechanic");
+    }
+
+    @Test
+    void bundledCatalogCoversTheWikiIndexesAndDocumentedDamageAttributes() {
+        com.google.gson.JsonObject root = com.google.gson.JsonParser.parseString(new CatalogService().json()).getAsJsonObject();
+        assertTrue(root.getAsJsonArray("mechanics").size() >= 300, "all wiki mechanics");
+        assertTrue(root.getAsJsonArray("conditions").size() >= 190, "all wiki conditions");
+        assertTrue(root.getAsJsonArray("targeters").size() >= 90, "all wiki targeters");
+        com.google.gson.JsonObject damage = null;
+        for (com.google.gson.JsonElement e : root.getAsJsonArray("mechanics")) {
+            if (e.getAsJsonObject().get("name").getAsString().equals("damage")) damage = e.getAsJsonObject();
+        }
+        assertNotNull(damage);
+        assertTrue(damage.getAsJsonArray("params").size() >= 19, "damage documents 19+ attributes on the wiki");
+    }
 }

@@ -1,6 +1,6 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import { LANGUAGE_ID } from "./language";
-import { parseContext, type EditorKind } from "./context";
+import { parseContext, findCallSite, isCommentPosition, stripInlineComment, type EditorKind, type ParamOwner } from "./context";
 import { CatalogIndex, NameIndex } from "./catalogIndex";
 import type { CatalogEntry, CatalogParam } from "../types";
 
@@ -9,14 +9,24 @@ const VALUE_TYPE_ENUM_KEY: Record<string, string> = {
   entitytype: "entitytype", color: "" // color uses #RRGGBB, no fixed list
 };
 
-function snippetForParams(name: string, entry: CatalogEntry | undefined): string {
+/** `name{a=${1:default};b=${2}}` for the entry's main parameters (case-insensitive match), or just `name`. */
+function snippetForParams(name: string, entry: CatalogEntry | undefined, maxMain = 2): string {
   if (!entry || !entry.params || entry.params.length === 0) return name;
-  const mainNames = entry.main && entry.main.length ? entry.main : entry.params.slice(0, 2).flatMap((p) => [p.names[0]]);
-  const chosen = entry.params.filter((p) => mainNames.includes(p.names[0]) || p.required);
+  const main = (entry.main && entry.main.length ? entry.main : [entry.params[0].names[0]]).map((m) => m.toLowerCase());
+  const chosen = entry.params.filter((p) => p.required || p.names.some((n) => main.includes(n.toLowerCase()))).slice(0, Math.max(maxMain, 1) + 2);
   if (chosen.length === 0) return name;
   let i = 1;
-  const parts = chosen.map((p) => `${p.names[0]}=\${${i++}:${p.default || (p.type === "boolean" ? "false" : "")}}`);
+  const esc = (v: string) => v.replace(/[\\$}]/g, "\\$&");
+  const parts = chosen.map((p) => `${p.names[0]}=\${${i++}:${esc(p.default || (p.type === "boolean" ? "false" : ""))}}`);
   return `${name}{${parts.join(";")}}$0`;
+}
+
+function paramDoc(p: CatalogParam, owner?: string): monaco.IMarkdownString {
+  let md = `**${p.names[0]}**${p.names.length > 1 ? `  \`${p.names.slice(1).join(", ")}\`` : ""}  *(${p.type}${p.required ? ", required" : ""})*`;
+  if (p.default) md += `\n\nDefault: \`${p.default}\``;
+  if (p.desc) md += `\n\n${p.desc}`;
+  if (owner) md += `\n\n_${owner}_`;
+  return { value: md, isTrusted: false };
 }
 
 function docFor(entry: CatalogEntry): monaco.IMarkdownString {
@@ -37,47 +47,68 @@ function kindOfCompletion(m: typeof monaco): typeof monaco.languages.CompletionI
   return m.languages.CompletionItemKind;
 }
 
+/** Inside a Conditions-style list `{...}` belongs to a condition, anywhere else to a mechanic. */
+function sectionOwner(model: monaco.editor.ITextModel, lineNumber: number): ParamOwner {
+  for (let n = lineNumber; n >= 1; n--) {
+    const m = /^\s{2}([A-Za-z0-9_]+)\s*:/.exec(model.getLineContent(n));
+    if (m) return /^(conditions|targetconditions|triggerconditions)$/i.test(m[1]) ? "condition" : "mechanic";
+  }
+  return "mechanic";
+}
+
+/** Range covering the `partial` characters just before the cursor (what the suggestion replaces). */
+function backRange(position: monaco.Position, partial: string): monaco.Range {
+  return new monaco.Range(position.lineNumber, Math.max(1, position.column - partial.length), position.lineNumber, position.column);
+}
+
+const RETRIGGER: monaco.languages.Command = { id: "editor.action.triggerSuggest", title: "Suggest values" };
+
 export function registerProviders(kind: EditorKind, catalogIndex: () => CatalogIndex | null, names: NameIndex) {
   const disposables: monaco.IDisposable[] = [];
 
   disposables.push(
     monaco.languages.registerCompletionItemProvider(LANGUAGE_ID, {
-      triggerCharacters: ["@", "~", "{", ";", "=", "<", ".", ":", " "],
+      triggerCharacters: ["@", "~", "{", ";", "=", "<", ".", ":", " ", "?", ","],
       provideCompletionItems(model, position) {
         const ci = catalogIndex();
-        if (!ci) return { suggestions: [] };
+        if (!ci || isCommentPosition(model.getLineContent(position.lineNumber), position.column - 1)) return { suggestions: [] };
         const text = model.getValue();
         const offset = model.getOffsetAt(position);
         const ctx = parseContext(text, offset, kind);
         const word = model.getWordUntilPosition(position);
-        const range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
-        const CK = kindOfCompletion(monaco);
+        const wordRange = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
+        const CK = monaco.languages.CompletionItemKind;
         const SNIPPET = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
 
         const suggestions: monaco.languages.CompletionItem[] = [];
 
-        const pushEntries = (entries: CatalogEntry[], iconKind: monaco.languages.CompletionItemKind, snippet: boolean) => {
+        /** mechanic / condition names: one item per name, one per alias (an alias inserts the canonical name) */
+        const pushEntries = (entries: CatalogEntry[], iconKind: monaco.languages.CompletionItemKind, range: monaco.Range) => {
           for (const e of entries) {
+            const insertText = snippetForParams(e.name, e);
             suggestions.push({
               label: { label: e.name, description: e.cat ?? e.source },
+              // Include aliases in Monaco's fuzzy-search corpus, so partial input such as "dama"
+              // can still surface the canonical mechanic and aliases resolve to that canonical entry.
+              filterText: [e.name, ...e.aliases].join(" "),
               kind: iconKind,
-              insertText: snippet ? snippetForParams(e.name, e) : e.name,
-              insertTextRules: snippet ? SNIPPET : undefined,
+              insertText,
+              insertTextRules: SNIPPET,
               documentation: docFor(e),
               detail: e.desc,
               range,
-              sortText: e.source === "bundled" ? "0" + e.name : "1" + e.name
+              sortText: "0" + e.name.toLowerCase()
             });
             for (const alias of e.aliases) {
               suggestions.push({
                 label: { label: alias, description: `alias of ${e.name}` },
                 kind: iconKind,
-                insertText: snippet ? snippetForParams(e.name, e) : e.name,
-                insertTextRules: snippet ? SNIPPET : undefined,
+                insertText,
+                insertTextRules: SNIPPET,
                 documentation: docFor(e),
                 filterText: alias,
                 range,
-                sortText: "2" + alias
+                sortText: "2" + alias.toLowerCase()
               });
             }
           }
@@ -87,110 +118,168 @@ export function registerProviders(kind: EditorKind, catalogIndex: () => CatalogI
           case "topKey": {
             const keyNames = kind === "mob" ? ci.mobKeys : ci.skillKeys;
             for (const k of keyNames) {
-              suggestions.push({ label: k, kind: CK.Field, insertText: k + ": ", range, sortText: "0" + k });
+              suggestions.push({ label: k, kind: CK.Field, insertText: k + ": ", range: wordRange, sortText: "0" + k });
             }
             break;
           }
           case "mechanicName": {
-            pushEntries(ci.mechanics, CK.Function, true);
+            pushEntries(ci.mechanics, CK.Function, backRange(position, ctx.partial));
+            break;
+          }
+          case "inlineCondition":
+          case "conditionsListMechanic": {
+            pushEntries(ci.conditions, CK.Operator, backRange(position, ctx.partial));
+            break;
+          }
+          case "conditionAction": {
+            const range = backRange(position, ctx.partial);
+            for (const a of ci.catalog.conditionActions ?? []) {
+              const word = a.name.split(" ")[0];
+              const hasArg = a.name.includes(" ");
+              suggestions.push({
+                label: { label: word, description: hasArg ? a.name.slice(word.length + 1) : "condition action" },
+                kind: CK.Keyword,
+                insertText: hasArg ? word + " " : word,
+                command: hasArg && word.toLowerCase() !== "power" ? RETRIGGER : undefined,
+                documentation: { value: a.desc },
+                detail: a.desc,
+                range
+              });
+            }
+            break;
+          }
+          case "conditionActionSkill": {
+            const range = backRange(position, ctx.partial);
+            for (const v of names.skills) suggestions.push({ label: v, kind: CK.Class, insertText: v, range });
             break;
           }
           case "targeter": {
+            const range = backRange(position, ctx.partial);
             for (const t of ci.targeters) {
-              const snippet = t.params && t.params.length ? `${t.name}{${t.main?.[0] ?? t.params[0].names[0]}=\${1:${t.params[0].default}}}` : t.name;
+              const snippet = snippetForParams(t.name, t, 1);
+              const insert = (n: string) => snippet.replace(t.name, n);
               suggestions.push({
-                label: { label: "@" + t.name, description: t.cat },
+                label: { label: t.name, description: "@ " + (t.cat ?? "targeter") },
                 kind: CK.Reference,
                 insertText: snippet,
                 insertTextRules: SNIPPET,
                 documentation: docFor(t),
+                detail: t.desc,
                 range,
-                sortText: "0" + t.name
+                sortText: "0" + t.name.toLowerCase()
               });
+              for (const alias of t.aliases) {
+                suggestions.push({
+                  label: { label: alias, description: `alias of @${t.name}` },
+                  kind: CK.Reference,
+                  insertText: insert(alias),
+                  insertTextRules: SNIPPET,
+                  documentation: docFor(t),
+                  filterText: alias,
+                  range,
+                  sortText: "1" + alias.toLowerCase()
+                });
+              }
             }
             break;
           }
           case "trigger": {
+            if (ctx.hasColon) break; // the part after ':' is a free argument (ticks, name, ...)
+            const range = backRange(position, ctx.partial);
             for (const t of ci.triggers) {
-              const insertText = (t as any).arg ? `${t.name}:\${1:${(t as any).arg}}` : t.name;
+              const arg = (t as any).arg as string | undefined;
               suggestions.push({
-                label: { label: "~" + t.name },
+                label: { label: t.name, description: "~ trigger" },
                 kind: CK.Event,
-                insertText,
+                insertText: arg ? `${t.name}:\${1:${arg}}` : t.name,
                 insertTextRules: SNIPPET,
                 documentation: { value: t.desc },
+                detail: t.desc,
                 range,
-                sortText: "0" + t.name
+                sortText: "0" + t.name.toLowerCase()
               });
             }
             break;
           }
-          case "conditionsListMechanic": {
-            pushEntries(ci.conditions, CK.Operator, true);
-            break;
-          }
           case "mechanicParamName": {
-            const entry = ci.mechanic(ctx.mechanic) ?? ci.condition(ctx.mechanic);
-            if (entry?.params) {
-              for (const p of entry.params) {
-                for (const n of p.names) {
-                  suggestions.push({
-                    label: { label: n, description: p.type + (p.required ? " (required)" : "") },
-                    kind: CK.Property,
-                    insertText: `${n}=`,
-                    documentation: { value: `*${p.type}*${p.default ? ` — default \`${p.default}\`` : ""}\n\n${p.desc}` },
-                    range,
-                    sortText: p.required ? "0" + n : "1" + n
-                  });
-                }
-              }
+            const entry = ci.entryFor(ctx.owner, ctx.mechanic);
+            const used = new Set(ctx.used);
+            const range = backRange(position, ctx.partial);
+            const own = new Set((entry?.params ?? []).map((p) => p.names[0].toLowerCase()));
+            for (const p of ci.paramsFor(ctx.owner, entry)) {
+              if (p.names.some((n) => used.has(n.toLowerCase()))) continue;
+              const shared = !own.has(p.names[0].toLowerCase());
+              p.names.forEach((n, idx) => {
+                suggestions.push({
+                  label: { label: n, description: idx === 0 ? p.type + (p.required ? " (required)" : "") : `alias of ${p.names[0]}` },
+                  kind: shared ? CK.Variable : CK.Property,
+                  insertText: `${n}=`,
+                  command: RETRIGGER,
+                  detail: p.names.length > 1 ? p.names.join(", ") : undefined,
+                  documentation: paramDoc(p, shared ? "applies to every " + ctx.owner : undefined),
+                  range,
+                  sortText: (p.required ? "0" : shared ? "2" : "1") + (idx === 0 ? "0" : "1") + n.toLowerCase()
+                });
+              });
             }
             break;
           }
           case "mechanicParamValue": {
-            const entry = ci.mechanic(ctx.mechanic) ?? ci.condition(ctx.mechanic);
-            const param = entry?.params?.find((p: CatalogParam) => p.names.some((n) => n.toLowerCase() === ctx.param));
-            if (param) {
-              if (param.type === "boolean") {
-                for (const v of ["true", "false"]) suggestions.push({ label: v, kind: CK.Value, insertText: v, range });
-              } else if (param.type === "enum") {
-                for (const v of ci.paramValues(param)) suggestions.push({ label: v, kind: CK.EnumMember, insertText: v, range });
-              } else if (param.type === "skill" || param.type === "skilllist") {
-                for (const v of names.skills) suggestions.push({ label: v, kind: CK.Class, insertText: v, range });
-              } else if (param.type === "mob") {
-                for (const v of names.mobs) suggestions.push({ label: v, kind: CK.Class, insertText: v, range });
-              } else if (VALUE_TYPE_ENUM_KEY[param.type] !== undefined) {
-                for (const v of ci.enumValues(VALUE_TYPE_ENUM_KEY[param.type])) suggestions.push({ label: v, kind: CK.EnumMember, insertText: v, range });
-              }
+            if (ctx.inString) break;
+            const entry = ci.entryFor(ctx.owner, ctx.mechanic);
+            const param = ci.paramsFor(ctx.owner, entry).find((p: CatalogParam) => p.names.some((n) => n.toLowerCase() === ctx.param));
+            if (!param) break;
+            // comma separated lists (target=PLAYER,MOB): only the segment after the last comma is replaced
+            const seg = ctx.partial.slice(ctx.partial.lastIndexOf(",") + 1);
+            const range = backRange(position, seg);
+            const add = (values: string[], itemKind: monaco.languages.CompletionItemKind) => {
+              for (const v of values) suggestions.push({ label: v, kind: itemKind, insertText: v, range });
+            };
+            if (param.type === "boolean") add(["true", "false"], CK.Value);
+            else if (param.type === "enum") add(ci.paramValues(param), CK.EnumMember);
+            else if (param.type === "skill" || param.type === "skilllist") add(names.skills, CK.Class);
+            else if (param.type === "mob") add(names.mobs, CK.Class);
+            else if (param.type === "item") add(names.items, CK.Class);
+            else if (VALUE_TYPE_ENUM_KEY[param.type]) add(ci.enumValues(VALUE_TYPE_ENUM_KEY[param.type]), CK.EnumMember);
+            if (param.default && param.default.length <= 40 && !suggestions.some((x) => x.label === param.default)) {
+              suggestions.push({ label: { label: param.default, description: "default" }, kind: CK.Constant, insertText: param.default, range, sortText: "9" + param.default });
             }
             break;
           }
           case "mobOptionKey": {
-            for (const k of ci.mobOptions) suggestions.push({ label: k, kind: CK.Property, insertText: k + ": ", range });
+            for (const k of ci.mobOptions) suggestions.push({ label: k, kind: CK.Property, insertText: k + ": ", range: wordRange });
             break;
           }
           case "mobOptionValue": {
-            for (const v of ["true", "false"]) suggestions.push({ label: v, kind: CK.Value, insertText: v, range });
+            for (const v of ["true", "false"]) suggestions.push({ label: v, kind: CK.Value, insertText: v, range: wordRange });
             break;
           }
           case "aiGoal": {
-            for (const g of ci.aiGoals) suggestions.push({ label: g, kind: CK.Function, insertText: g, range });
+            for (const g of ci.aiGoals) suggestions.push({ label: g, kind: CK.Function, insertText: g, range: wordRange });
             break;
           }
           case "aiTarget": {
-            for (const g of ci.aiTargets) suggestions.push({ label: g, kind: CK.Function, insertText: g, range });
+            for (const g of ci.aiTargets) suggestions.push({ label: g, kind: CK.Function, insertText: g, range: wordRange });
             break;
           }
           case "placeholder": {
+            const range = backRange(position, ctx.partial);
             for (const p of ci.catalog.placeholders) {
-              suggestions.push({ label: p.name, kind: CK.Variable, insertText: p.name + ">", documentation: { value: p.desc }, range });
+              suggestions.push({
+                label: { label: p.name, description: p.type },
+                kind: CK.Variable,
+                insertText: p.name + ">",
+                documentation: { value: p.desc },
+                detail: p.desc,
+                range
+              });
             }
             break;
           }
           case "topKeyValue": {
             if (ctx.key === "Type") {
-              for (const v of ci.enumValues("entitytype")) suggestions.push({ label: v, kind: CK.EnumMember, insertText: v, range });
-              for (const v of names.mobs) suggestions.push({ label: v, kind: CK.Class, detail: "extend this mob", insertText: v, range });
+              for (const v of ci.enumValues("entitytype")) suggestions.push({ label: v, kind: CK.EnumMember, insertText: v, range: wordRange });
+              for (const v of names.mobs) suggestions.push({ label: v, kind: CK.Class, detail: "extend this mob", insertText: v, range: wordRange });
             }
             break;
           }
@@ -210,6 +299,18 @@ export function registerProviders(kind: EditorKind, catalogIndex: () => CatalogI
         const word = model.getWordAtPosition(position);
         if (!word) return null;
         const w = word.word;
+        const wordRange = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
+        // a parameter key inside {...}: show its own documentation
+        const lineText = model.getLineContent(position.lineNumber);
+        if (lineText[word.endColumn - 1] === "=") {
+          const before = lineText.slice(0, word.endColumn - 1);
+          const body = before.replace(/^\s*-\s?/, "");
+          const site = findCallSite(body, sectionOwner(model, position.lineNumber));
+          if (site && site.key === null) {
+            const p = ci.paramsFor(site.owner, ci.entryFor(site.owner, site.name)).find((x) => x.names.some((n) => n.toLowerCase() === w.toLowerCase()));
+            if (p) return { range: wordRange, contents: [paramDoc(p)] };
+          }
+        }
         const entry = ci.mechanic(w) ?? ci.targeter(w) ?? ci.condition(w);
         if (entry) {
           return { range: new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn), contents: [docFor(entry)] };
@@ -308,9 +409,10 @@ export function computeDiagnostics(text: string, kind: EditorKind, ci: CatalogIn
   let section = "";
   for (let i = 1; i < lines.length; i++) {
     const raw = lines[i];
-    const indentMatch = /^(\s*)/.exec(raw)!;
+    const active = stripInlineComment(raw);
+    const indentMatch = /^(\s*)/.exec(active)!;
     const indent = indentMatch[1].length;
-    const trimmed = raw.trim();
+    const trimmed = active.trim();
     if (trimmed === "" || trimmed.startsWith("#")) continue;
     if (indent === 2) {
       const km = /^([A-Za-z0-9_]+)\s*:/.exec(trimmed);
@@ -346,19 +448,150 @@ export function computeDiagnostics(text: string, kind: EditorKind, ci: CatalogIn
       const paramBlock = /\{([^{}]*)\}/.exec(body);
       if (paramBlock && mechMatch) {
         const entry = ci.mechanic(mechMatch[1]);
-        if (entry?.params) {
+        if (entry) {
+          const used = new Set<string>();
+          const allParams = ci.paramsFor("mechanic", entry);
           for (const pair of splitArgs(paramBlock[1])) {
             const eq = pair.indexOf("=");
             if (eq < 0) continue;
             const key = pair.slice(0, eq).trim().toLowerCase();
             const val = pair.slice(eq + 1).trim();
-            const param = entry.params.find((p) => p.names.some((n) => n.toLowerCase() === key));
-            if (!param) continue;
+            if (!key) continue;
+            used.add(key);
+            const param = allParams.find((p) => p.names.some((n) => n.toLowerCase() === key));
+            if (!param) {
+              // Missing documentation is not proof of invalid syntax: keep this informational.
+              diags.push(info(`Unrecognized attribute '${key}' for ${entry.name}; verify MythicMobs version or addon`, i + 1, col, col + body.length));
+              continue;
+            }
             if (param.type === "boolean" && val && !/^(true|false)$/i.test(val) && !val.startsWith("<")) {
               diags.push(warn(`'${key}' expects true/false, got '${val}'`, i + 1, col, col + body.length));
             }
             if ((param.type === "number" || param.type === "integer") && val && !/^-?\d+(\.\d+)?$/.test(val) && !val.startsWith("<")) {
               diags.push(warn(`'${key}' expects a number, got '${val}'`, i + 1, col, col + body.length));
+            }
+            if (param.type === "integer" && val && /^-?\d+\.\d+$/.test(val) && !val.startsWith("<")) {
+              diags.push(warn(`'${key}' expects an integer, got '${val}'`, i + 1, col, col + body.length));
+            }
+            const allowed = param.values ?? (param.type === "enum" ? ci.paramValues(param) : []);
+            if (allowed.length && val && !val.startsWith("<") && !allowed.some((v) => v.toLowerCase() === val.toLowerCase())) {
+              diags.push(warn(`'${key}' must be one of: ${allowed.join(", ")}`, i + 1, col, col + body.length));
+            }
+          }
+          for (const param of entry.params ?? []) {
+            if (param.required && !param.names.some((n) => used.has(n.toLowerCase()))) {
+              diags.push(warn(`Missing required attribute '${param.names[0]}' for ${entry.name}`, i + 1, col, col + body.length));
+            }
+          }
+        }
+      }
+
+      // Inline conditions in skill DSL use ?Condition{...}; validate them independently from mechanic attributes.
+      const inlineCondition = /\?([A-Za-z][A-Za-z0-9_]*)\{([^{}]*)\}/.exec(body);
+      if (inlineCondition) {
+        const condition = ci.condition(inlineCondition[1]);
+        if (!condition) {
+          diags.push(warn(`Unknown condition '${inlineCondition[1]}'`, i + 1, col, col + body.length));
+        } else if (condition.params?.length) {
+          const used = new Set<string>();
+          const params = ci.paramsFor("condition", condition);
+          for (const pair of splitArgs(inlineCondition[2])) {
+            const eq = pair.indexOf("=");
+            if (eq < 0) continue;
+            const key = pair.slice(0, eq).trim().toLowerCase();
+            const val = pair.slice(eq + 1).trim();
+            if (!key) continue;
+            used.add(key);
+            const param = params.find((p) => p.names.some((n) => n.toLowerCase() === key));
+            if (!param) {
+              diags.push(info(`Unrecognized attribute '${key}' for condition ${condition.name}; verify version or addon`, i + 1, col, col + body.length));
+              continue;
+            }
+            if (param.type === "boolean" && val && !/^(true|false)$/i.test(val) && !val.startsWith("<")) {
+              diags.push(warn(`'${key}' expects true/false, got '${val}'`, i + 1, col, col + body.length));
+            }
+            if ((param.type === "number" || param.type === "integer") && val && !/^-?\d+(\.\d+)?$/.test(val) && !val.startsWith("<")) {
+              diags.push(warn(`'${key}' expects a number, got '${val}'`, i + 1, col, col + body.length));
+            }
+          }
+          for (const param of condition.params) {
+            if (param.required && !param.names.some((n) => used.has(n.toLowerCase()))) {
+              diags.push(warn(`Missing required attribute '${param.names[0]}' for condition ${condition.name}`, i + 1, col, col + body.length));
+            }
+          }
+        }
+      }
+
+      // Targeter attributes live inside the @Targeter{...} expression and use a separate catalog.
+      const targeterCall = /@([A-Za-z][A-Za-z0-9_]*)\{([^{}]*)\}/.exec(body);
+      if (targeterCall) {
+        const targeter = ci.targeter(targeterCall[1]);
+        if (targeter) {
+          const used = new Set<string>();
+          const params = ci.paramsFor("targeter", targeter);
+          for (const pair of splitArgs(targeterCall[2])) {
+            const eq = pair.indexOf("=");
+            if (eq < 0) continue;
+            const key = pair.slice(0, eq).trim().toLowerCase();
+            const val = pair.slice(eq + 1).trim();
+            if (!key) continue;
+            used.add(key);
+            const param = params.find((p) => p.names.some((n) => n.toLowerCase() === key));
+            if (!param) {
+              // Informational only: third-party extensions and version-specific attributes may be valid.
+              if (targeter.params?.length) diags.push(info(`Unrecognized attribute '${key}' for @${targeter.name}; verify version or addon`, i + 1, col, col + body.length));
+              continue;
+            }
+            if (param.type === "boolean" && val && !/^(true|false)$/i.test(val) && !val.startsWith("<")) {
+              diags.push(warn(`'${key}' expects true/false, got '${val}'`, i + 1, col, col + body.length));
+            }
+            if ((param.type === "number" || param.type === "integer") && val && !/^-?\d+(\.\d+)?$/.test(val) && !val.startsWith("<")) {
+              diags.push(warn(`'${key}' expects a number, got '${val}'`, i + 1, col, col + body.length));
+            }
+          }
+          for (const param of targeter.params ?? []) {
+            if (param.required && !param.names.some((n) => used.has(n.toLowerCase()))) {
+              diags.push(warn(`Missing required attribute '${param.names[0]}' for @${targeter.name}`, i + 1, col, col + body.length));
+            }
+          }
+        }
+      }
+    }
+
+    // Conditions are also used in mob-level Conditions/TargetConditions sections, not only inline skill syntax.
+    if (["conditions", "targetconditions", "triggerconditions"].includes(section)) {
+      const conditionMatch = /^([A-Za-z][A-Za-z0-9_]*)/.exec(body);
+      if (conditionMatch) {
+        const condition = ci.condition(conditionMatch[1]);
+        if (!condition) {
+          diags.push(warn(`Unknown condition '${conditionMatch[1]}'`, i + 1, col, col + conditionMatch[1].length));
+        } else {
+          const conditionBlock = /\{([^{}]*)\}/.exec(body);
+          if (conditionBlock) {
+            const used = new Set<string>();
+            for (const pair of splitArgs(conditionBlock[1])) {
+              const eq = pair.indexOf("=");
+              if (eq < 0) continue;
+              const key = pair.slice(0, eq).trim().toLowerCase();
+              const val = pair.slice(eq + 1).trim();
+              if (!key) continue;
+              used.add(key);
+              const param = ci.paramsFor("condition", condition).find((p) => p.names.some((n) => n.toLowerCase() === key));
+              if (!param) {
+                if (condition.params?.length) diags.push(info(`Unrecognized attribute '${key}' for condition ${condition.name}; verify version or addon`, i + 1, col, col + body.length));
+                continue;
+              }
+              if (param.type === "boolean" && val && !/^(true|false)$/i.test(val) && !val.startsWith("<")) {
+                diags.push(warn(`'${key}' expects true/false, got '${val}'`, i + 1, col, col + body.length));
+              }
+              if ((param.type === "number" || param.type === "integer") && val && !/^-?\d+(\.\d+)?$/.test(val) && !val.startsWith("<")) {
+                diags.push(warn(`'${key}' expects a number, got '${val}'`, i + 1, col, col + body.length));
+              }
+            }
+            for (const param of condition.params ?? []) {
+              if (param.required && !param.names.some((n) => used.has(n.toLowerCase()))) {
+                diags.push(warn(`Missing required attribute '${param.names[0]}' for condition ${condition.name}`, i + 1, col, col + body.length));
+              }
             }
           }
         }
@@ -376,10 +609,18 @@ export function computeDiagnostics(text: string, kind: EditorKind, ci: CatalogIn
 
 function splitArgs(inner: string): string[] {
   const out: string[] = [];
-  let depth = 0, cur = "";
+  let depth = 0, cur = "", quote: string | null = null, escaped = false;
   for (const c of inner) {
+    if (quote) {
+      cur += c;
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'") { quote = c; cur += c; continue; }
     if (c === "{" || c === "[") depth++;
-    if (c === "}" || c === "]") depth--;
+    if (c === "}" || c === "]") depth = Math.max(0, depth - 1);
     if (c === ";" && depth === 0) {
       out.push(cur);
       cur = "";

@@ -5,22 +5,71 @@
  */
 export type EditorKind = "skill" | "mob" | "item" | "droptable";
 
+export type ParamOwner = "mechanic" | "targeter" | "condition";
+
 export type Ctx =
   | { area: "topKey" }
   | { area: "topKeyValue"; key: string }
   | { area: "skillsListStart" }
-  | { area: "mechanicName" }
-  | { area: "targeter" }
-  | { area: "trigger"; hasColon: boolean }
-  | { area: "mechanicParamName"; mechanic: string; open: number }
-  | { area: "mechanicParamValue"; mechanic: string; param: string; open: number }
-  | { area: "conditionsListMechanic" }
+  | { area: "mechanicName"; partial: string }
+  | { area: "targeter"; partial: string }
+  | { area: "trigger"; hasColon: boolean; partial: string }
+  | { area: "inlineCondition"; partial: string }
+  | { area: "mechanicParamName"; owner: ParamOwner; mechanic: string; open: number; used: string[]; partial: string }
+  | { area: "mechanicParamValue"; owner: ParamOwner; mechanic: string; param: string; open: number; used: string[]; partial: string; inString: boolean }
+  | { area: "conditionsListMechanic"; partial: string }
+  | { area: "conditionAction"; partial: string }
+  | { area: "conditionActionSkill"; partial: string }
   | { area: "mobOptionKey" }
   | { area: "mobOptionValue"; key: string }
   | { area: "aiGoal" }
   | { area: "aiTarget" }
-  | { area: "placeholder" }
+  | { area: "placeholder"; partial: string }
   | { area: "none" };
+
+
+/** Returns true when the cursor is inside a YAML/skill-line comment, not inside a quoted value. */
+export function isCommentPosition(line: string, cursorOffset: number): boolean {
+  const limit = Math.max(0, Math.min(cursorOffset, line.length));
+  let quote: string | null = null;
+  let escaped = false;
+  for (let i = 0; i < limit; i++) {
+    const c = line[i];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === quote) quote = null;
+      continue;
+    }
+    if ((c === "\"" || c === "'") && (i === 0 || /[=:,\s]/.test(line[i - 1]))) {
+      quote = c;
+      continue;
+    }
+    if (c === "#" && (i === 0 || /\s/.test(line[i - 1]))) return true;
+  }
+  return false;
+}
+
+/** Removes an inline comment while preserving # inside quoted strings and unspaced hex colors. */
+export function stripInlineComment(line: string): string {
+  let quote: string | null = null;
+  let escaped = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (quote) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === quote) quote = null;
+      continue;
+    }
+    if ((c === "\"" || c === "'") && (i === 0 || /[=:,\s]/.test(line[i - 1]))) {
+      quote = c;
+      continue;
+    }
+    if (c === "#" && (i === 0 || /\s/.test(line[i - 1]))) return line.slice(0, i).replace(/[ \t]+$/, "");
+  }
+  return line;
+}
 
 export interface Line {
   text: string;
@@ -46,46 +95,98 @@ function findSection(lines: string[], lineNumber: number): string | null {
   return null;
 }
 
+/** A `{...}` argument block that is still open at the cursor: which mechanic/targeter/condition owns it. */
+export interface CallSite {
+  owner: ParamOwner;
+  name: string;
+  open: number;
+  /** lower-cased keys already written earlier in this block (so they are not offered again) */
+  used: string[];
+  /** lower-cased key whose value is being typed, or null while a key is being typed */
+  key: string | null;
+  /** text typed so far for the current key (key === null) or value (key !== null) */
+  partial: string;
+  /** the cursor is inside a quoted value, where no catalog suggestions make sense */
+  inString: boolean;
+}
+
+/**
+ * Finds the innermost unclosed `{` of a skill/condition line (cursor is at the end of `body`) and describes it.
+ * Quotes only open after `=` (so an apostrophe in plain text such as `m=Don't` cannot hide the rest of the line),
+ * and `;` inside quotes or nested braces does not separate arguments.
+ */
+export function findCallSite(body: string, fallbackOwner: ParamOwner = "mechanic"): CallSite | null {
+  const stack: number[] = [];
+  let quote: string | null = null;
+  for (let i = 0; i < body.length; i++) {
+    const c = body[i];
+    if (quote) {
+      if (c === quote) quote = null;
+      continue;
+    }
+    if ((c === '"' || c === "'") && body[i - 1] === "=") { quote = c; continue; }
+    if (c === "{") stack.push(i);
+    else if (c === "}") stack.pop();
+  }
+  if (!stack.length) return null;
+  const open = stack[stack.length - 1];
+
+  const head = /([@?!~]*)([A-Za-z0-9_:.\-]+)$/.exec(body.slice(0, open));
+  if (!head) return null;
+  const prefix = head[1];
+  const owner: ParamOwner = prefix.includes("@") ? "targeter" : prefix.includes("?") ? "condition" : fallbackOwner;
+  let name = head[2];
+  if (owner === "mechanic") {
+    const lower = name.toLowerCase();
+    name = lower.startsWith("skill:") || lower.startsWith("metaskill:") ? "skill" : (name.split(":").pop() ?? name);
+  }
+
+  // split the arguments written so far on top-level ';'
+  const pieces: string[] = [];
+  let cur = "", depth = 0, q: string | null = null;
+  const inner = body.slice(open + 1);
+  for (let i = 0; i < inner.length; i++) {
+    const c = inner[i];
+    if (q) { cur += c; if (c === q) q = null; continue; }
+    if ((c === '"' || c === "'") && inner[i - 1] === "=") { q = c; cur += c; continue; }
+    if (c === "{" || c === "[") depth++;
+    if (c === "}" || c === "]") depth--;
+    if (c === ";" && depth === 0) { pieces.push(cur); cur = ""; continue; }
+    cur += c;
+  }
+  const used = pieces.map((p) => p.split("=")[0].trim().toLowerCase()).filter(Boolean);
+  const eq = cur.indexOf("=");
+  if (eq < 0) return { owner, name, open, used, key: null, partial: cur.trimStart(), inString: false };
+  return { owner, name, open, used, key: cur.slice(0, eq).trim().toLowerCase(), partial: cur.slice(eq + 1).trimStart(), inString: q !== null };
+}
+
+function paramCtx(site: CallSite): Ctx {
+  return site.key === null
+    ? { area: "mechanicParamName", owner: site.owner, mechanic: site.name, open: site.open, used: site.used, partial: site.partial }
+    : { area: "mechanicParamValue", owner: site.owner, mechanic: site.name, param: site.key, open: site.open, used: site.used, partial: site.partial, inString: site.inString };
+}
+
 /** Splits "- damage{amount=10;ia=true} @Target ~onAttack" into its recognizable pieces, cursor-aware. */
-function analyzeSkillLine(textBeforeCursor: string): Ctx {
+export function analyzeSkillLine(textBeforeCursor: string): Ctx {
   // strip leading "- "
   const dash = /^\s*-\s?/.exec(textBeforeCursor);
   const body = dash ? textBeforeCursor.slice(dash[0].length) : textBeforeCursor;
 
-  const lastAt = body.lastIndexOf("@");
-  const lastTilde = body.lastIndexOf("~");
-  const lastOpenBrace = body.lastIndexOf("{");
-  const lastCloseBrace = body.lastIndexOf("}");
-  const lastOpenAngle = body.lastIndexOf("<");
-  const lastCloseAngle = body.lastIndexOf(">");
-  const lastSpace = Math.max(body.lastIndexOf(" "), body.lastIndexOf(";"), body.lastIndexOf("{"));
+  // <placeholder>  — but not a comparison such as `health{a=<50}`
+  const ph = /<([A-Za-z][A-Za-z0-9_.]*)?$/.exec(body);
+  if (ph && (ph[1] || !/[=!]$/.test(body.slice(0, ph.index)))) return { area: "placeholder", partial: ph[1] ?? "" };
 
-  if (lastOpenAngle > lastCloseAngle && lastOpenAngle >= 0) return { area: "placeholder" };
+  const site = findCallSite(body, "mechanic");
+  if (site) return paramCtx(site);
 
-  if (lastOpenBrace > lastCloseBrace && lastOpenBrace >= 0) {
-    const mechMatch = /([A-Za-z0-9_:]+)\s*\{[^{}]*$/.exec(body.slice(0, lastOpenBrace + 1));
-    const mechanic = (mechMatch ? mechMatch[1] : "").split(":").pop() ?? "";
-    const inner = body.slice(lastOpenBrace + 1);
-    const lastSemi = Math.max(inner.lastIndexOf(";"), 0);
-    const currentArg = inner.slice(lastOpenBrace >= 0 ? lastSemi === 0 && !inner.includes(";") ? 0 : lastSemi + (inner[lastSemi] === ";" ? 1 : 0) : 0);
-    const eq = currentArg.indexOf("=");
-    if (eq >= 0) {
-      const param = currentArg.slice(0, eq).trim().toLowerCase();
-      return { area: "mechanicParamValue", mechanic, param, open: lastOpenBrace };
-    }
-    return { area: "mechanicParamName", mechanic, open: lastOpenBrace };
-  }
-
-  if (lastAt > lastTilde && lastAt > lastSpace - 1 && lastAt === body.length - 1 - (body.length - 1 - lastAt) && lastAt >= 0 && /^@[A-Za-z]*$/.test(body.slice(lastAt))) {
-    return { area: "targeter" };
-  }
-  if (lastTilde >= 0 && /^~[A-Za-z]*(:[A-Za-z0-9_]*)?$/.test(body.slice(lastTilde))) {
-    return { area: "trigger", hasColon: body.slice(lastTilde).includes(":") };
-  }
-  // still typing the mechanic name at the start of the line (no space yet)
-  if (!/\s/.test(body.trim()) && lastAt < 0 && lastTilde < 0) {
-    return { area: "mechanicName" };
-  }
+  const tg = /(?:^|\s)@([A-Za-z0-9_]*)$/.exec(body);
+  if (tg) return { area: "targeter", partial: tg[1] };
+  const tr = /(?:^|\s)~([A-Za-z0-9_]*)(:[^\s]*)?$/.exec(body);
+  if (tr) return { area: "trigger", hasColon: tr[2] !== undefined, partial: tr[1] };
+  const ic = /(?:^|\s)\?[!~]?([A-Za-z0-9_]*)$/.exec(body);
+  if (ic) return { area: "inlineCondition", partial: ic[1] };
+  // still typing the mechanic name at the start of the line (e.g. "dama" or "effect:part")
+  if (/^[A-Za-z0-9_:.\-]*$/.test(body)) return { area: "mechanicName", partial: body };
   return { area: "none" };
 }
 
@@ -119,15 +220,15 @@ export function parseContext(fullText: string, offset: number, kind: EditorKind)
   if (sectionLower === "conditions" || sectionLower === "targetconditions" || sectionLower === "triggerconditions") {
     if (isListItem) {
       const body = trimmed.replace(/^-\s?/, "");
-      if (body.includes("{")) {
-        const open = body.lastIndexOf("{");
-        const close = body.lastIndexOf("}");
-        if (open > close) {
-          const mechMatch = /([A-Za-z0-9_]+)\s*\{[^{}]*$/.exec(body.slice(0, open + 1));
-          return { area: "mechanicParamName", mechanic: mechMatch ? mechMatch[1] : "", open };
-        }
-      }
-      return { area: "conditionsListMechanic" };
+      const site = findCallSite(body, "condition");
+      if (site) return paramCtx(site);
+      // "- sunny orElseCast <skill>": the argument of a cast-style action is a skill name
+      const skillArg = /\s(?:cast|castinstead|orelsecast)\s+([A-Za-z0-9_\-]*)$/i.exec(body);
+      if (skillArg) return { area: "conditionActionSkill", partial: skillArg[1] };
+      // "- health{h=>10} po": the action word that follows a complete condition
+      const action = /^[A-Za-z0-9_:.\-!~?]+(?:\{[^{}]*\})?\s+([A-Za-z]*)$/.exec(body);
+      if (action) return { area: "conditionAction", partial: action[1] };
+      if (/^[A-Za-z0-9_:.\-!~?]*$/.test(body)) return { area: "conditionsListMechanic", partial: body.replace(/^[!~?]+/, "") };
     }
     return { area: "none" };
   }

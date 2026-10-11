@@ -1,0 +1,83 @@
+{
+ "damage": {
+  "name": "damage",
+  "url": "https://wiki.mythiccraft.io/mythicmobs/Skills/Mechanics/damage",
+  "aliases": [
+   "d"
+  ],
+  "params": [
+   "amount,a|number|1|The amount of damage to deal",
+   "ignoreArmor,ia,i|boolean|false|Whether or not to ignore armor, but will still use enchantment modifiers when calculating total damage",
+   "preventknockback,pkb,pk|boolean|false|Whether or not to prevent knockback",
+   "preventimmunity,pi|boolean|false|Whether or not to prevent the damage immunity ticks on the target by setting them to 0 after the damage is inflicted",
+   "damagecause,dc,cause|string|entity_attack|Sets the damage cause for this damage mechanic. (This option is only available for 1.17+)",
+   "ignoreenchantments,ignoreenchants,ie|boolean|false|Whether or not to ignore enchantments when calculating total damage. (This option is only available for 1.19+)",
+   "noanger,na|boolean|false|Whether or not to generate anger when damaging the entity",
+   "ignoreinvulnerability,ignoreinvulnerable,ii|boolean|false|Whether or not to ignore the damage immunity ticks on the target by setting them to 0 before the damage is inflicted",
+   "ignoreshield,is|boolean|false|Whether or not to ignore the shield blocking on the target",
+   "damageshelmet,dh|boolean|false|Whether or not the helmet should be damaged",
+   "ignoreeffects,ieff|boolean|false|Whether or not effects should be ignored",
+   "ignoreresistance,ir|boolean|false|Whether or not resistance should be ignored",
+   "poweraffectsdamage,pad|boolean|true|Should the skill's power affect the damage inflicted",
+   "tags,tag|string||Allows you to specify any number of arbitrary tags for the mechanic using tags=THIS,THAT. All tags inserted will be UPPERCASED",
+   "rawtags,rtag|string||Works the same as tags and what is put here will also qualify as a tag, but it will not be UPPERCASED like tags",
+   "damagetype,element,e|string||Becomes one of the Tags",
+   "triggerSkills,ts|boolean|false|Whether the damage mechanic should also be able to trigger onAttack related triggers",
+   "bonusdamage|string||The bonus damage to deal, in the format FIRE 5,LIGHTNING 5",
+   "bonusdamagemodifiers,bonusdamagemods|string||Multiplies the associated bonus damages by the specified values"
+  ],
+  "main": [
+   "amount"
+  ]
+ },
+ "modifydamage": {
+  "name": "modifyDamage",
+  "url": "https://wiki.mythiccraft.io/mythicmobs/skills/mechanics/ModifyDamage",
+  "aliases": [
+   "modDamage"
+  ],
+  "params": [
+   "amount,a|number|1|The amount of the operation",
+   "damagetype,type,dt,t|string|ALL|The type of the damage to evaluate",
+   "action,mod,m|string|ADD|The modifier to use"
+  ],
+  "main": [
+   "amount"
+  ],
+  "verification": "manual_verified_from_official_search_result",
+  "verifiedAt": "2026-10-11T00:00:00Z"
+ },
+ "consume": {
+  "name": "consume",
+  "url": "https://wiki.mythiccraft.io/mythicmobs/skills/mechanics/consume",
+  "aliases": [],
+  "params": [
+   "damage,d,dmg|number|1|The amount of damage to deal",
+   "heal,h|number|1|The amount of healing per mob damaged"
+  ],
+  "main": [
+   "damage"
+  ],
+  "verification": "manual_verified_from_official_search_result",
+  "verifiedAt": "2026-10-11T00:00:00Z"
+ },
+ "skill": {
+  "name": "skill",
+  "url": "https://wiki.mythiccraft.io/mythicmobs/skills/mechanics/skill",
+  "aliases": [
+   "metaskill"
+  ],
+  "params": [
+   "skill,s,$,(),m,mechanics,meta,spell|skill||The metaskill to be executed",
+   "forcesync,sync|boolean|false|Whether to force the skill to be run synchronously with Minecraft",
+   "branch,b,fork,f|boolean|false|Whether the called metaskill skill tree branches off from the calling skill tree",
+   "executeafterdeath,continueafterdeath|boolean|false|Whether the metaskill can be called after the caster dies",
+   "snapshotcasterstats,snapshotstats,scs|boolean|false|Whether caster stats are snapshotted when the skill executes"
+  ],
+  "main": [
+   "skill"
+  ],
+  "verification": "manual_verified_from_official_search_result",
+  "verifiedAt": "2026-10-11T00:00:00Z"
+ }
+}

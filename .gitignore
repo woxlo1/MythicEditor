@@ -8,3 +8,6 @@ web/dist/
 *.iml
 .vscode/
 *.log
+
+# scraper cache (raw wiki HTML)
+tools/catalog/.cache/

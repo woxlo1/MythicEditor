@@ -1,4 +1,5 @@
 import type { Catalog, CatalogEntry, CatalogParam } from "../types";
+import type { ParamOwner } from "./context";
 
 /** Fast case-insensitive lookup over the catalog (mechanic/targeter/condition name -> aliases -> entry). */
 export class CatalogIndex {
@@ -54,6 +55,28 @@ export class CatalogIndex {
     if (p.values && p.values.length) return p.values;
     if (p.enumRef) return this.enumValues(p.enumRef);
     return [];
+  }
+
+  entryFor(owner: ParamOwner, name: string): CatalogEntry | undefined {
+    return owner === "targeter" ? this.targeter(name) : owner === "condition" ? this.condition(name) : this.mechanic(name);
+  }
+
+  /**
+   * Every parameter that may be written inside `{...}` for this owner: the entry's own parameters first, then the
+   * attributes shared by all mechanics / targeters (cooldown, delay, repeat, chance, ...). Entries that only carry
+   * a name (no documented parameters) still get the shared attributes.
+   */
+  paramsFor(owner: ParamOwner, entry: CatalogEntry | undefined): CatalogParam[] {
+    const shared = owner === "mechanic" ? this.catalog.mechanicAttributes : owner === "targeter" ? this.catalog.targeterAttributes : undefined;
+    const out: CatalogParam[] = [];
+    const seen = new Set<string>();
+    for (const p of [...(entry?.params ?? []), ...(shared ?? [])]) {
+      const keys = p.names.map((n) => n.toLowerCase());
+      if (keys.some((k) => seen.has(k))) continue;
+      keys.forEach((k) => seen.add(k));
+      out.push(p);
+    }
+    return out;
   }
 
   isKnownMechanic(name: string) { return this.mechByName.has(name.toLowerCase()); }

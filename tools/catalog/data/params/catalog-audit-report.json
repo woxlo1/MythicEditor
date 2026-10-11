@@ -1,0 +1,2476 @@
+{
+  "generatedAt": "2026-10-11T11:05:16.824257+00:00",
+  "catalogPath": "core/src/main/resources/catalog/mythicmobs-5.json",
+  "officialExpectedCounts": {
+    "mechanics": 303,
+    "conditions": 197,
+    "targeters": 93
+  },
+  "sections": [
+    {
+      "section": "mechanics",
+      "expectedCatalogCount": 303,
+      "catalogCount": 303,
+      "nameRegistered": 303,
+      "documentedCount": 302,
+      "entrySpecificParameterCount": 51,
+      "fullyVerifiedCount": 0,
+      "fullyVerifiedNote": "Not assigned until all official pages, version constraints, aliases, and parameter schemas for the section have been audited.",
+      "officialIndexObservedCount": null,
+      "officialIndexObservationStatus": "not_observed_live_in_this_run",
+      "parameterScrapeWithRows": 4,
+      "parameterScrapeAliasOnly": 0,
+      "noParameterTable": 0,
+      "parseFailed": 0,
+      "notFetched": 0,
+      "untracked": 299,
+      "fetchStatusCounts": {
+        "http_404": 0,
+        "network_error": 0,
+        "source_missing": 0,
+        "stale_cache": 0,
+        "cached": 0,
+        "fetched": 0,
+        "local_file": 0
+      },
+      "unresolvedEntries": [
+        {
+          "name": "damagepercent",
+          "status": "untracked"
+        },
+        {
+          "name": "basedamage",
+          "status": "untracked"
+        },
+        {
+          "name": "heal",
+          "status": "untracked"
+        },
+        {
+          "name": "healpercent",
+          "status": "untracked"
+        },
+        {
+          "name": "threat",
+          "status": "untracked"
+        },
+        {
+          "name": "explosion",
+          "status": "untracked"
+        },
+        {
+          "name": "lightning",
+          "status": "untracked"
+        },
+        {
+          "name": "ignite",
+          "status": "untracked"
+        },
+        {
+          "name": "extinguish",
+          "status": "untracked"
+        },
+        {
+          "name": "potion",
+          "status": "untracked"
+        },
+        {
+          "name": "projectile",
+          "status": "untracked"
+        },
+        {
+          "name": "sudoskill",
+          "status": "untracked"
+        },
+        {
+          "name": "randomskill",
+          "status": "untracked"
+        },
+        {
+          "name": "delay",
+          "status": "untracked"
+        },
+        {
+          "name": "aura",
+          "status": "untracked"
+        },
+        {
+          "name": "removeaura",
+          "status": "untracked"
+        },
+        {
+          "name": "summon",
+          "status": "untracked"
+        },
+        {
+          "name": "remove",
+          "status": "untracked"
+        },
+        {
+          "name": "setlevel",
+          "status": "untracked"
+        },
+        {
+          "name": "setowner",
+          "status": "untracked"
+        },
+        {
+          "name": "settarget",
+          "status": "untracked"
+        },
+        {
+          "name": "message",
+          "status": "untracked"
+        },
+        {
+          "name": "sendtitle",
+          "status": "untracked"
+        },
+        {
+          "name": "sendactionmessage",
+          "status": "untracked"
+        },
+        {
+          "name": "command",
+          "status": "untracked"
+        },
+        {
+          "name": "sound",
+          "status": "untracked"
+        },
+        {
+          "name": "effect:particles",
+          "status": "untracked"
+        },
+        {
+          "name": "effect:particlering",
+          "status": "untracked"
+        },
+        {
+          "name": "effect:particleline",
+          "status": "untracked"
+        },
+        {
+          "name": "effect:particlesphere",
+          "status": "untracked"
+        },
+        {
+          "name": "effect:particletornado",
+          "status": "untracked"
+        },
+        {
+          "name": "effect:lightning",
+          "status": "untracked"
+        },
+        {
+          "name": "effect:explosion",
+          "status": "untracked"
+        },
+        {
+          "name": "glow",
+          "status": "untracked"
+        },
+        {
+          "name": "teleport",
+          "status": "untracked"
+        },
+        {
+          "name": "teleportto",
+          "status": "untracked"
+        },
+        {
+          "name": "throw",
+          "status": "untracked"
+        },
+        {
+          "name": "leap",
+          "status": "untracked"
+        },
+        {
+          "name": "pull",
+          "status": "untracked"
+        },
+        {
+          "name": "push",
+          "status": "untracked"
+        },
+        {
+          "name": "velocity",
+          "status": "untracked"
+        },
+        {
+          "name": "lookat",
+          "status": "untracked"
+        },
+        {
+          "name": "jump",
+          "status": "untracked"
+        },
+        {
+          "name": "setgravity",
+          "status": "untracked"
+        },
+        {
+          "name": "mount",
+          "status": "untracked"
+        },
+        {
+          "name": "mountme",
+          "status": "untracked"
+        },
+        {
+          "name": "setvariable",
+          "status": "untracked"
+        },
+        {
+          "name": "giveitem",
+          "status": "untracked"
+        },
+        {
+          "name": "disguise",
+          "status": "untracked"
+        },
+        {
+          "name": "undisguise",
+          "status": "untracked"
+        },
+        {
+          "name": "cancelevent",
+          "status": "untracked"
+        },
+        {
+          "name": "activatespawner",
+          "status": "untracked"
+        },
+        {
+          "name": "totem",
+          "status": "untracked"
+        },
+        {
+          "name": "blockwave",
+          "status": "untracked"
+        },
+        {
+          "name": "breakblock",
+          "status": "untracked"
+        },
+        {
+          "name": "oxygen",
+          "status": "untracked"
+        },
+        {
+          "name": "feed",
+          "status": "untracked"
+        },
+        {
+          "name": "modifyscore",
+          "status": "untracked"
+        },
+        {
+          "name": "addtrade",
+          "status": "untracked"
+        },
+        {
+          "name": "animatearmorstand",
+          "status": "untracked"
+        },
+        {
+          "name": "armanimation",
+          "status": "untracked"
+        },
+        {
+          "name": "arrowvolley",
+          "status": "untracked"
+        },
+        {
+          "name": "attribute",
+          "status": "untracked"
+        },
+        {
+          "name": "attributemodifier",
+          "status": "untracked"
+        },
+        {
+          "name": "barcreate",
+          "status": "untracked"
+        },
+        {
+          "name": "barremove",
+          "status": "untracked"
+        },
+        {
+          "name": "barset",
+          "status": "untracked"
+        },
+        {
+          "name": "blackscreen",
+          "status": "untracked"
+        },
+        {
+          "name": "blockdestabilize",
+          "status": "untracked"
+        },
+        {
+          "name": "blockmask",
+          "status": "untracked"
+        },
+        {
+          "name": "blockunmask",
+          "status": "untracked"
+        },
+        {
+          "name": "blockphysics",
+          "status": "untracked"
+        },
+        {
+          "name": "bloodyscreen",
+          "status": "untracked"
+        },
+        {
+          "name": "bonemeal",
+          "status": "untracked"
+        },
+        {
+          "name": "bossborder",
+          "status": "untracked"
+        },
+        {
+          "name": "bouncy",
+          "status": "untracked"
+        },
+        {
+          "name": "breakblockandgiveitem",
+          "status": "untracked"
+        },
+        {
+          "name": "clearexperience",
+          "status": "untracked"
+        },
+        {
+          "name": "clearexperiencelevels",
+          "status": "untracked"
+        },
+        {
+          "name": "cleartarget",
+          "status": "untracked"
+        },
+        {
+          "name": "giveexperiencelevels",
+          "status": "untracked"
+        },
+        {
+          "name": "takeexperiencelevels",
+          "status": "untracked"
+        },
+        {
+          "name": "closeinventory",
+          "status": "untracked"
+        },
+        {
+          "name": "consumeslot",
+          "status": "untracked"
+        },
+        {
+          "name": "directionalvelocity",
+          "status": "untracked"
+        },
+        {
+          "name": "disengage",
+          "status": "untracked"
+        },
+        {
+          "name": "disguisemodify",
+          "status": "untracked"
+        },
+        {
+          "name": "disguisetarget",
+          "status": "untracked"
+        },
+        {
+          "name": "dismount",
+          "status": "untracked"
+        },
+        {
+          "name": "displaytransformation",
+          "status": "untracked"
+        },
+        {
+          "name": "clearthreat",
+          "status": "untracked"
+        },
+        {
+          "name": "currencygive",
+          "status": "untracked"
+        },
+        {
+          "name": "currencytake",
+          "status": "untracked"
+        },
+        {
+          "name": "decapitate",
+          "status": "untracked"
+        },
+        {
+          "name": "doppleganger",
+          "status": "untracked"
+        },
+        {
+          "name": "dropitem",
+          "status": "untracked"
+        },
+        {
+          "name": "ejectpassenger",
+          "status": "untracked"
+        },
+        {
+          "name": "ender",
+          "status": "untracked"
+        },
+        {
+          "name": "enderbeam",
+          "status": "untracked"
+        },
+        {
+          "name": "enderdragonresetcrystals",
+          "status": "untracked"
+        },
+        {
+          "name": "enderdragonsetphase",
+          "status": "untracked"
+        },
+        {
+          "name": "enderdragonsetrespawnphase",
+          "status": "untracked"
+        },
+        {
+          "name": "enderdragonspawnportal",
+          "status": "untracked"
+        },
+        {
+          "name": "equip",
+          "status": "untracked"
+        },
+        {
+          "name": "equipcopy",
+          "status": "untracked"
+        },
+        {
+          "name": "fawepaste",
+          "status": "untracked"
+        },
+        {
+          "name": "fear",
+          "status": "untracked"
+        },
+        {
+          "name": "fillchest",
+          "status": "untracked"
+        },
+        {
+          "name": "firework",
+          "status": "untracked"
+        },
+        {
+          "name": "flames",
+          "status": "untracked"
+        },
+        {
+          "name": "fly",
+          "status": "untracked"
+        },
+        {
+          "name": "followpath",
+          "status": "untracked"
+        },
+        {
+          "name": "forcepull",
+          "status": "untracked"
+        },
+        {
+          "name": "foreach",
+          "status": "untracked"
+        },
+        {
+          "name": "foreachpin",
+          "status": "untracked"
+        },
+        {
+          "name": "foreachvalue",
+          "status": "untracked"
+        },
+        {
+          "name": "formline",
+          "status": "untracked"
+        },
+        {
+          "name": "freeze",
+          "status": "untracked"
+        },
+        {
+          "name": "geyser",
+          "status": "untracked"
+        },
+        {
+          "name": "giveitemfromslot",
+          "status": "untracked"
+        },
+        {
+          "name": "giveitemfromtarget",
+          "status": "untracked"
+        },
+        {
+          "name": "goatram",
+          "status": "untracked"
+        },
+        {
+          "name": "goto",
+          "status": "untracked"
+        },
+        {
+          "name": "guardianbeam",
+          "status": "untracked"
+        },
+        {
+          "name": "hide",
+          "status": "untracked"
+        },
+        {
+          "name": "hit",
+          "status": "untracked"
+        },
+        {
+          "name": "hologram",
+          "status": "untracked"
+        },
+        {
+          "name": "itemspray",
+          "status": "untracked"
+        },
+        {
+          "name": "jsonmessage",
+          "status": "untracked"
+        },
+        {
+          "name": "log",
+          "status": "untracked"
+        },
+        {
+          "name": "lunge",
+          "status": "untracked"
+        },
+        {
+          "name": "matchrotation",
+          "status": "untracked"
+        },
+        {
+          "name": "modifyglobalscore",
+          "status": "untracked"
+        },
+        {
+          "name": "modifytargetscore",
+          "status": "untracked"
+        },
+        {
+          "name": "modifymobscore",
+          "status": "untracked"
+        },
+        {
+          "name": "mounttarget",
+          "status": "untracked"
+        },
+        {
+          "name": "movepin",
+          "status": "untracked"
+        },
+        {
+          "name": "opencustommenu",
+          "status": "untracked"
+        },
+        {
+          "name": "opentrades",
+          "status": "untracked"
+        },
+        {
+          "name": "particlebox",
+          "status": "untracked"
+        },
+        {
+          "name": "particleequation",
+          "status": "untracked"
+        },
+        {
+          "name": "particlelinehelix",
+          "status": "untracked"
+        },
+        {
+          "name": "particlelinering",
+          "status": "untracked"
+        },
+        {
+          "name": "particleorbital",
+          "status": "untracked"
+        },
+        {
+          "name": "atom",
+          "status": "untracked"
+        },
+        {
+          "name": "pickupitem",
+          "status": "untracked"
+        },
+        {
+          "name": "playanimation",
+          "status": "untracked"
+        },
+        {
+          "name": "playblockbreaksound",
+          "status": "untracked"
+        },
+        {
+          "name": "playblockfallsound",
+          "status": "untracked"
+        },
+        {
+          "name": "playblockhitsound",
+          "status": "untracked"
+        },
+        {
+          "name": "playblockplacesound",
+          "status": "untracked"
+        },
+        {
+          "name": "playblockstepsound",
+          "status": "untracked"
+        },
+        {
+          "name": "posearmorstand",
+          "status": "untracked"
+        },
+        {
+          "name": "potionclear",
+          "status": "untracked"
+        },
+        {
+          "name": "prison",
+          "status": "untracked"
+        },
+        {
+          "name": "printparenttree",
+          "status": "untracked"
+        },
+        {
+          "name": "propel",
+          "status": "untracked"
+        },
+        {
+          "name": "pushblock",
+          "status": "untracked"
+        },
+        {
+          "name": "pushbutton",
+          "status": "untracked"
+        },
+        {
+          "name": "raytrace",
+          "status": "untracked"
+        },
+        {
+          "name": "raytraceto",
+          "status": "untracked"
+        },
+        {
+          "name": "rally",
+          "status": "untracked"
+        },
+        {
+          "name": "randommessage",
+          "status": "untracked"
+        },
+        {
+          "name": "recoil",
+          "status": "untracked"
+        },
+        {
+          "name": "remount",
+          "status": "untracked"
+        },
+        {
+          "name": "removehelditem",
+          "status": "untracked"
+        },
+        {
+          "name": "removeowner",
+          "status": "untracked"
+        },
+        {
+          "name": "addtag",
+          "status": "untracked"
+        },
+        {
+          "name": "removetag",
+          "status": "untracked"
+        },
+        {
+          "name": "resetai",
+          "status": "untracked"
+        },
+        {
+          "name": "rotatetowards",
+          "status": "untracked"
+        },
+        {
+          "name": "runaigoalselector",
+          "status": "untracked"
+        },
+        {
+          "name": "runaitargetselector",
+          "status": "untracked"
+        },
+        {
+          "name": "saddle",
+          "status": "untracked"
+        },
+        {
+          "name": "sendresourcepack",
+          "status": "untracked"
+        },
+        {
+          "name": "sendtoast",
+          "status": "untracked"
+        },
+        {
+          "name": "setai",
+          "status": "untracked"
+        },
+        {
+          "name": "setblockopen",
+          "status": "untracked"
+        },
+        {
+          "name": "setblocktype",
+          "status": "untracked"
+        },
+        {
+          "name": "setchunkforceloaded",
+          "status": "untracked"
+        },
+        {
+          "name": "setcollidable",
+          "status": "untracked"
+        },
+        {
+          "name": "setcustommenubutton",
+          "status": "untracked"
+        },
+        {
+          "name": "setdisplayentityitem",
+          "status": "untracked"
+        },
+        {
+          "name": "setdragonpodium",
+          "status": "untracked"
+        },
+        {
+          "name": "setfaction",
+          "status": "untracked"
+        },
+        {
+          "name": "setflying",
+          "status": "untracked"
+        },
+        {
+          "name": "setgamemode",
+          "status": "untracked"
+        },
+        {
+          "name": "setgliding",
+          "status": "untracked"
+        },
+        {
+          "name": "setglobalscore",
+          "status": "untracked"
+        },
+        {
+          "name": "sethealth",
+          "status": "untracked"
+        },
+        {
+          "name": "setinteractionsize",
+          "status": "untracked"
+        },
+        {
+          "name": "setitemgroupcooldown",
+          "status": "untracked"
+        },
+        {
+          "name": "setleashholder",
+          "status": "untracked"
+        },
+        {
+          "name": "setmaterialcooldown",
+          "status": "untracked"
+        },
+        {
+          "name": "setmaxhealth",
+          "status": "untracked"
+        },
+        {
+          "name": "setmobcolor",
+          "status": "untracked"
+        },
+        {
+          "name": "setmobscore",
+          "status": "untracked"
+        },
+        {
+          "name": "setname",
+          "status": "untracked"
+        },
+        {
+          "name": "setraidercanjoinraid",
+          "status": "untracked"
+        },
+        {
+          "name": "setraiderpatrolblock",
+          "status": "untracked"
+        },
+        {
+          "name": "setraiderpatrolleader",
+          "status": "untracked"
+        },
+        {
+          "name": "setnodamageticks",
+          "status": "untracked"
+        },
+        {
+          "name": "setparent",
+          "status": "untracked"
+        },
+        {
+          "name": "setpathfindingmalus",
+          "status": "untracked"
+        },
+        {
+          "name": "setpitch",
+          "status": "untracked"
+        },
+        {
+          "name": "setpose",
+          "status": "untracked"
+        },
+        {
+          "name": "setrotation",
+          "status": "untracked"
+        },
+        {
+          "name": "settargetscore",
+          "status": "untracked"
+        },
+        {
+          "name": "settextdisplay",
+          "status": "untracked"
+        },
+        {
+          "name": "settonguetarget",
+          "status": "untracked"
+        },
+        {
+          "name": "setscore",
+          "status": "untracked"
+        },
+        {
+          "name": "setspeed",
+          "status": "untracked"
+        },
+        {
+          "name": "setstance",
+          "status": "untracked"
+        },
+        {
+          "name": "shield",
+          "status": "untracked"
+        },
+        {
+          "name": "shieldbreak",
+          "status": "untracked"
+        },
+        {
+          "name": "shieldpercent",
+          "status": "untracked"
+        },
+        {
+          "name": "shootfireball",
+          "status": "untracked"
+        },
+        {
+          "name": "shootpotion",
+          "status": "untracked"
+        },
+        {
+          "name": "shootskull",
+          "status": "untracked"
+        },
+        {
+          "name": "shootshulkerbullet",
+          "status": "untracked"
+        },
+        {
+          "name": "showdialog",
+          "status": "untracked"
+        },
+        {
+          "name": "showentity",
+          "status": "untracked"
+        },
+        {
+          "name": "signal",
+          "status": "untracked"
+        },
+        {
+          "name": "skybox",
+          "status": "untracked"
+        },
+        {
+          "name": "smoke",
+          "status": "untracked"
+        },
+        {
+          "name": "smokeswirl",
+          "status": "untracked"
+        },
+        {
+          "name": "stealitem",
+          "status": "untracked"
+        },
+        {
+          "name": "stopsound",
+          "status": "untracked"
+        },
+        {
+          "name": "speak",
+          "status": "untracked"
+        },
+        {
+          "name": "spin",
+          "status": "untracked"
+        },
+        {
+          "name": "spring",
+          "status": "untracked"
+        },
+        {
+          "name": "stun",
+          "status": "untracked"
+        },
+        {
+          "name": "stopusingitem",
+          "status": "untracked"
+        },
+        {
+          "name": "suicide",
+          "status": "untracked"
+        },
+        {
+          "name": "summonareaeffectcloud",
+          "status": "untracked"
+        },
+        {
+          "name": "summonfallingblock",
+          "status": "untracked"
+        },
+        {
+          "name": "summonpassenger",
+          "status": "untracked"
+        },
+        {
+          "name": "swap",
+          "status": "untracked"
+        },
+        {
+          "name": "swingoffhand",
+          "status": "untracked"
+        },
+        {
+          "name": "takeitem",
+          "status": "untracked"
+        },
+        {
+          "name": "taunt",
+          "status": "untracked"
+        },
+        {
+          "name": "teleporty",
+          "status": "untracked"
+        },
+        {
+          "name": "teleportin",
+          "status": "untracked"
+        },
+        {
+          "name": "time",
+          "status": "untracked"
+        },
+        {
+          "name": "thunderlevel",
+          "status": "untracked"
+        },
+        {
+          "name": "togglelever",
+          "status": "untracked"
+        },
+        {
+          "name": "togglepiston",
+          "status": "untracked"
+        },
+        {
+          "name": "togglesitting",
+          "status": "untracked"
+        },
+        {
+          "name": "totemofundying",
+          "status": "untracked"
+        },
+        {
+          "name": "tracklocation",
+          "status": "untracked"
+        },
+        {
+          "name": "undopaste",
+          "status": "untracked"
+        },
+        {
+          "name": "weather",
+          "status": "untracked"
+        },
+        {
+          "name": "wolfsit",
+          "status": "untracked"
+        },
+        {
+          "name": "worldeditreplace",
+          "status": "untracked"
+        },
+        {
+          "name": "variableskill",
+          "status": "untracked"
+        },
+        {
+          "name": "beam",
+          "status": "untracked"
+        },
+        {
+          "name": "cancelskill",
+          "status": "untracked"
+        },
+        {
+          "name": "cast",
+          "status": "untracked"
+        },
+        {
+          "name": "chain",
+          "status": "untracked"
+        },
+        {
+          "name": "chainmissile",
+          "status": "untracked"
+        },
+        {
+          "name": "determinecondition",
+          "status": "untracked"
+        },
+        {
+          "name": "endprojectile",
+          "status": "untracked"
+        },
+        {
+          "name": "globalcooldown",
+          "status": "untracked"
+        },
+        {
+          "name": "missile",
+          "status": "untracked"
+        },
+        {
+          "name": "modifyprojectile",
+          "status": "untracked"
+        },
+        {
+          "name": "onattack",
+          "status": "untracked"
+        },
+        {
+          "name": "ondamaged",
+          "status": "untracked"
+        },
+        {
+          "name": "onshoot",
+          "status": "untracked"
+        },
+        {
+          "name": "onblockbreak",
+          "status": "untracked"
+        },
+        {
+          "name": "onblockplace",
+          "status": "untracked"
+        },
+        {
+          "name": "onchat",
+          "status": "untracked"
+        },
+        {
+          "name": "onswing",
+          "status": "untracked"
+        },
+        {
+          "name": "oninteract",
+          "status": "untracked"
+        },
+        {
+          "name": "onjump",
+          "status": "untracked"
+        },
+        {
+          "name": "ondeath",
+          "status": "untracked"
+        },
+        {
+          "name": "onkeypress",
+          "status": "untracked"
+        },
+        {
+          "name": "onkeyrelease",
+          "status": "untracked"
+        },
+        {
+          "name": "orbital",
+          "status": "untracked"
+        },
+        {
+          "name": "polygon",
+          "status": "untracked"
+        },
+        {
+          "name": "projectilevelocity",
+          "status": "untracked"
+        },
+        {
+          "name": "setskillcooldown",
+          "status": "untracked"
+        },
+        {
+          "name": "setprojectiledirection",
+          "status": "untracked"
+        },
+        {
+          "name": "setprojectilebulletmodel",
+          "status": "untracked"
+        },
+        {
+          "name": "shoot",
+          "status": "untracked"
+        },
+        {
+          "name": "slash",
+          "status": "untracked"
+        },
+        {
+          "name": "switch",
+          "status": "untracked"
+        },
+        {
+          "name": "stataura",
+          "status": "untracked"
+        },
+        {
+          "name": "terminable",
+          "status": "untracked"
+        },
+        {
+          "name": "volley",
+          "status": "untracked"
+        },
+        {
+          "name": "variableadd",
+          "status": "untracked"
+        },
+        {
+          "name": "variablemath",
+          "status": "untracked"
+        },
+        {
+          "name": "setvariablelocation",
+          "status": "untracked"
+        },
+        {
+          "name": "variableunset",
+          "status": "untracked"
+        },
+        {
+          "name": "variablesubtract",
+          "status": "untracked"
+        },
+        {
+          "name": "variablemove",
+          "status": "untracked"
+        },
+        {
+          "name": "wait",
+          "status": "untracked"
+        },
+        {
+          "name": "cinematiccamera",
+          "status": "untracked"
+        },
+        {
+          "name": "cinematiccancel",
+          "status": "untracked"
+        },
+        {
+          "name": "closedialog",
+          "status": "untracked"
+        }
+      ],
+      "aliasCollisions": [],
+      "sourceIndexLineCount": 302
+    },
+    {
+      "section": "conditions",
+      "expectedCatalogCount": 197,
+      "catalogCount": 197,
+      "nameRegistered": 197,
+      "documentedCount": 195,
+      "entrySpecificParameterCount": 25,
+      "fullyVerifiedCount": 0,
+      "fullyVerifiedNote": "Not assigned until all official pages, version constraints, aliases, and parameter schemas for the section have been audited.",
+      "officialIndexObservedCount": null,
+      "officialIndexObservationStatus": "not_observed_live_in_this_run",
+      "parameterScrapeWithRows": 2,
+      "parameterScrapeAliasOnly": 0,
+      "noParameterTable": 0,
+      "parseFailed": 0,
+      "notFetched": 0,
+      "untracked": 195,
+      "fetchStatusCounts": {
+        "http_404": 0,
+        "network_error": 0,
+        "source_missing": 0,
+        "stale_cache": 0,
+        "cached": 0,
+        "fetched": 0,
+        "local_file": 0
+      },
+      "unresolvedEntries": [
+        {
+          "name": "distance",
+          "status": "untracked"
+        },
+        {
+          "name": "distancefromspawn",
+          "status": "untracked"
+        },
+        {
+          "name": "altitude",
+          "status": "untracked"
+        },
+        {
+          "name": "stance",
+          "status": "untracked"
+        },
+        {
+          "name": "entitytype",
+          "status": "untracked"
+        },
+        {
+          "name": "world",
+          "status": "untracked"
+        },
+        {
+          "name": "biome",
+          "status": "untracked"
+        },
+        {
+          "name": "lightlevel",
+          "status": "untracked"
+        },
+        {
+          "name": "day",
+          "status": "untracked"
+        },
+        {
+          "name": "night",
+          "status": "untracked"
+        },
+        {
+          "name": "raining",
+          "status": "untracked"
+        },
+        {
+          "name": "thundering",
+          "status": "untracked"
+        },
+        {
+          "name": "outside",
+          "status": "untracked"
+        },
+        {
+          "name": "crouching",
+          "status": "untracked"
+        },
+        {
+          "name": "sprinting",
+          "status": "untracked"
+        },
+        {
+          "name": "onground",
+          "status": "untracked"
+        },
+        {
+          "name": "flying",
+          "status": "untracked"
+        },
+        {
+          "name": "gliding",
+          "status": "untracked"
+        },
+        {
+          "name": "swimming",
+          "status": "untracked"
+        },
+        {
+          "name": "moving",
+          "status": "untracked"
+        },
+        {
+          "name": "incombat",
+          "status": "untracked"
+        },
+        {
+          "name": "hasaura",
+          "status": "untracked"
+        },
+        {
+          "name": "haspotioneffect",
+          "status": "untracked"
+        },
+        {
+          "name": "hasowner",
+          "status": "untracked"
+        },
+        {
+          "name": "hasparent",
+          "status": "untracked"
+        },
+        {
+          "name": "haspermission",
+          "status": "untracked"
+        },
+        {
+          "name": "holding",
+          "status": "untracked"
+        },
+        {
+          "name": "wearing",
+          "status": "untracked"
+        },
+        {
+          "name": "mobsinradius",
+          "status": "untracked"
+        },
+        {
+          "name": "playersinradius",
+          "status": "untracked"
+        },
+        {
+          "name": "targetwithin",
+          "status": "untracked"
+        },
+        {
+          "name": "targetnotwithin",
+          "status": "untracked"
+        },
+        {
+          "name": "lineofsight",
+          "status": "untracked"
+        },
+        {
+          "name": "variableisset",
+          "status": "untracked"
+        },
+        {
+          "name": "variableequals",
+          "status": "untracked"
+        },
+        {
+          "name": "variableinrange",
+          "status": "untracked"
+        },
+        {
+          "name": "level",
+          "status": "untracked"
+        },
+        {
+          "name": "chance",
+          "status": "untracked"
+        },
+        {
+          "name": "ownerisonline",
+          "status": "untracked"
+        },
+        {
+          "name": "time",
+          "status": "untracked"
+        },
+        {
+          "name": "biometype",
+          "status": "untracked"
+        },
+        {
+          "name": "blocktype",
+          "status": "untracked"
+        },
+        {
+          "name": "blocktypeinradius",
+          "status": "untracked"
+        },
+        {
+          "name": "blocking",
+          "status": "untracked"
+        },
+        {
+          "name": "boundingboxesoverlap",
+          "status": "untracked"
+        },
+        {
+          "name": "bowtension",
+          "status": "untracked"
+        },
+        {
+          "name": "burning",
+          "status": "untracked"
+        },
+        {
+          "name": "charged",
+          "status": "untracked"
+        },
+        {
+          "name": "children",
+          "status": "untracked"
+        },
+        {
+          "name": "color",
+          "status": "untracked"
+        },
+        {
+          "name": "comparevalues",
+          "status": "untracked"
+        },
+        {
+          "name": "cuboid",
+          "status": "untracked"
+        },
+        {
+          "name": "damagecause",
+          "status": "untracked"
+        },
+        {
+          "name": "damagetag",
+          "status": "untracked"
+        },
+        {
+          "name": "dawn",
+          "status": "untracked"
+        },
+        {
+          "name": "dimension",
+          "status": "untracked"
+        },
+        {
+          "name": "directionalvelocity",
+          "status": "untracked"
+        },
+        {
+          "name": "distancefromlocation",
+          "status": "untracked"
+        },
+        {
+          "name": "distancefrompin",
+          "status": "untracked"
+        },
+        {
+          "name": "distancefromtrackedlocation",
+          "status": "untracked"
+        },
+        {
+          "name": "dusk",
+          "status": "untracked"
+        },
+        {
+          "name": "enchantingexperience",
+          "status": "untracked"
+        },
+        {
+          "name": "enchantinglevel",
+          "status": "untracked"
+        },
+        {
+          "name": "enderdragonalive",
+          "status": "untracked"
+        },
+        {
+          "name": "enderdragonphase",
+          "status": "untracked"
+        },
+        {
+          "name": "entityitemissimilar",
+          "status": "untracked"
+        },
+        {
+          "name": "entityitemtype",
+          "status": "untracked"
+        },
+        {
+          "name": "entitymaterialtype",
+          "status": "untracked"
+        },
+        {
+          "name": "faction",
+          "status": "untracked"
+        },
+        {
+          "name": "fallspeed",
+          "status": "untracked"
+        },
+        {
+          "name": "fieldofview",
+          "status": "untracked"
+        },
+        {
+          "name": "foodlevel",
+          "status": "untracked"
+        },
+        {
+          "name": "foodsaturation",
+          "status": "untracked"
+        },
+        {
+          "name": "gamemode",
+          "status": "untracked"
+        },
+        {
+          "name": "globalscore",
+          "status": "untracked"
+        },
+        {
+          "name": "hasai",
+          "status": "untracked"
+        },
+        {
+          "name": "hasaurastacks",
+          "status": "untracked"
+        },
+        {
+          "name": "hasauratype",
+          "status": "untracked"
+        },
+        {
+          "name": "hascurrency",
+          "status": "untracked"
+        },
+        {
+          "name": "hasdialogopen",
+          "status": "untracked"
+        },
+        {
+          "name": "hasenchantment",
+          "status": "untracked"
+        },
+        {
+          "name": "hasfreeinventoryslot",
+          "status": "untracked"
+        },
+        {
+          "name": "hasgravity",
+          "status": "untracked"
+        },
+        {
+          "name": "hasitem",
+          "status": "untracked"
+        },
+        {
+          "name": "hasoffhand",
+          "status": "untracked"
+        },
+        {
+          "name": "haspassenger",
+          "status": "untracked"
+        },
+        {
+          "name": "hastag",
+          "status": "untracked"
+        },
+        {
+          "name": "healthpercent",
+          "status": "untracked"
+        },
+        {
+          "name": "height",
+          "status": "untracked"
+        },
+        {
+          "name": "heightabove",
+          "status": "untracked"
+        },
+        {
+          "name": "heightbelow",
+          "status": "untracked"
+        },
+        {
+          "name": "inbounds",
+          "status": "untracked"
+        },
+        {
+          "name": "inclaim",
+          "status": "untracked"
+        },
+        {
+          "name": "inpinregion",
+          "status": "untracked"
+        },
+        {
+          "name": "isinvulnerable",
+          "status": "untracked"
+        },
+        {
+          "name": "isinsurvivalmode",
+          "status": "untracked"
+        },
+        {
+          "name": "inside",
+          "status": "untracked"
+        },
+        {
+          "name": "isbaby",
+          "status": "untracked"
+        },
+        {
+          "name": "iscancelled",
+          "status": "untracked"
+        },
+        {
+          "name": "iscaster",
+          "status": "untracked"
+        },
+        {
+          "name": "ischild",
+          "status": "untracked"
+        },
+        {
+          "name": "isclimbing",
+          "status": "untracked"
+        },
+        {
+          "name": "iscreeperprimed",
+          "status": "untracked"
+        },
+        {
+          "name": "isfrozen",
+          "status": "untracked"
+        },
+        {
+          "name": "isincinematic",
+          "status": "untracked"
+        },
+        {
+          "name": "isleashed",
+          "status": "untracked"
+        },
+        {
+          "name": "isliving",
+          "status": "untracked"
+        },
+        {
+          "name": "ismonster",
+          "status": "untracked"
+        },
+        {
+          "name": "ismythicmob",
+          "status": "untracked"
+        },
+        {
+          "name": "isparentalive",
+          "status": "untracked"
+        },
+        {
+          "name": "isparent",
+          "status": "untracked"
+        },
+        {
+          "name": "isplayer",
+          "status": "untracked"
+        },
+        {
+          "name": "israiderpatrolleader",
+          "status": "untracked"
+        },
+        {
+          "name": "issaddled",
+          "status": "untracked"
+        },
+        {
+          "name": "issibling",
+          "status": "untracked"
+        },
+        {
+          "name": "isskill",
+          "status": "untracked"
+        },
+        {
+          "name": "istamed",
+          "status": "untracked"
+        },
+        {
+          "name": "isusingspyglass",
+          "status": "untracked"
+        },
+        {
+          "name": "itemgrouponcooldown",
+          "status": "untracked"
+        },
+        {
+          "name": "itemissimilar",
+          "status": "untracked"
+        },
+        {
+          "name": "itemrecharging",
+          "status": "untracked"
+        },
+        {
+          "name": "itemtype",
+          "status": "untracked"
+        },
+        {
+          "name": "lastdamagecause",
+          "status": "untracked"
+        },
+        {
+          "name": "lastsignal",
+          "status": "untracked"
+        },
+        {
+          "name": "lightlevelfromblocks",
+          "status": "untracked"
+        },
+        {
+          "name": "skylightlevel",
+          "status": "untracked"
+        },
+        {
+          "name": "lineofsightfromorigin",
+          "status": "untracked"
+        },
+        {
+          "name": "livinginradius",
+          "status": "untracked"
+        },
+        {
+          "name": "localdifficulty",
+          "status": "untracked"
+        },
+        {
+          "name": "lookingat",
+          "status": "untracked"
+        },
+        {
+          "name": "lunarphase",
+          "status": "untracked"
+        },
+        {
+          "name": "materialisoncooldown",
+          "status": "untracked"
+        },
+        {
+          "name": "metaskillcondition",
+          "status": "untracked"
+        },
+        {
+          "name": "mobsinchunk",
+          "status": "untracked"
+        },
+        {
+          "name": "mobsinworld",
+          "status": "untracked"
+        },
+        {
+          "name": "mobsnearorigin",
+          "status": "untracked"
+        },
+        {
+          "name": "mobsize",
+          "status": "untracked"
+        },
+        {
+          "name": "moist",
+          "status": "untracked"
+        },
+        {
+          "name": "moisturelevel",
+          "status": "untracked"
+        },
+        {
+          "name": "motionx",
+          "status": "untracked"
+        },
+        {
+          "name": "motiony",
+          "status": "untracked"
+        },
+        {
+          "name": "motionz",
+          "status": "untracked"
+        },
+        {
+          "name": "mounted",
+          "status": "untracked"
+        },
+        {
+          "name": "mythicmobtype",
+          "status": "untracked"
+        },
+        {
+          "name": "mythicpack",
+          "status": "untracked"
+        },
+        {
+          "name": "mythicpackversion",
+          "status": "untracked"
+        },
+        {
+          "name": "mythicpackversiongreater",
+          "status": "untracked"
+        },
+        {
+          "name": "name",
+          "status": "untracked"
+        },
+        {
+          "name": "nearclaim",
+          "status": "untracked"
+        },
+        {
+          "name": "notinregion",
+          "status": "untracked"
+        },
+        {
+          "name": "offgcd",
+          "status": "untracked"
+        },
+        {
+          "name": "onblock",
+          "status": "untracked"
+        },
+        {
+          "name": "origindistancefrompin",
+          "status": "untracked"
+        },
+        {
+          "name": "originlocation",
+          "status": "untracked"
+        },
+        {
+          "name": "owner",
+          "status": "untracked"
+        },
+        {
+          "name": "pitch",
+          "status": "untracked"
+        },
+        {
+          "name": "playerkills",
+          "status": "untracked"
+        },
+        {
+          "name": "playernotwithin",
+          "status": "untracked"
+        },
+        {
+          "name": "playerwithin",
+          "status": "untracked"
+        },
+        {
+          "name": "playersinworld",
+          "status": "untracked"
+        },
+        {
+          "name": "playersonline",
+          "status": "untracked"
+        },
+        {
+          "name": "plugin",
+          "status": "untracked"
+        },
+        {
+          "name": "premium",
+          "status": "untracked"
+        },
+        {
+          "name": "projectilehasended",
+          "status": "untracked"
+        },
+        {
+          "name": "region",
+          "status": "untracked"
+        },
+        {
+          "name": "samefaction",
+          "status": "untracked"
+        },
+        {
+          "name": "score",
+          "status": "untracked"
+        },
+        {
+          "name": "serverispaper",
+          "status": "untracked"
+        },
+        {
+          "name": "servernmsversion",
+          "status": "untracked"
+        },
+        {
+          "name": "serverversion",
+          "status": "untracked"
+        },
+        {
+          "name": "serverversionafterorequal",
+          "status": "untracked"
+        },
+        {
+          "name": "serverversionbefore",
+          "status": "untracked"
+        },
+        {
+          "name": "size",
+          "status": "untracked"
+        },
+        {
+          "name": "skilloncooldown",
+          "status": "untracked"
+        },
+        {
+          "name": "spawnreason",
+          "status": "untracked"
+        },
+        {
+          "name": "statdamagemodifier",
+          "status": "untracked"
+        },
+        {
+          "name": "stringempty",
+          "status": "untracked"
+        },
+        {
+          "name": "stringnotempty",
+          "status": "untracked"
+        },
+        {
+          "name": "stringequals",
+          "status": "untracked"
+        },
+        {
+          "name": "structure",
+          "status": "untracked"
+        },
+        {
+          "name": "sunny",
+          "status": "untracked"
+        },
+        {
+          "name": "targetinlineofsight",
+          "status": "untracked"
+        },
+        {
+          "name": "targetnotinlineofsight",
+          "status": "untracked"
+        },
+        {
+          "name": "targets",
+          "status": "untracked"
+        },
+        {
+          "name": "templatetype",
+          "status": "untracked"
+        },
+        {
+          "name": "triggerblocktype",
+          "status": "untracked"
+        },
+        {
+          "name": "triggeritemtype",
+          "status": "untracked"
+        },
+        {
+          "name": "variablecontains",
+          "status": "untracked"
+        },
+        {
+          "name": "vehicleisdead",
+          "status": "untracked"
+        },
+        {
+          "name": "velocity",
+          "status": "untracked"
+        },
+        {
+          "name": "worldtime",
+          "status": "untracked"
+        },
+        {
+          "name": "yaw",
+          "status": "untracked"
+        },
+        {
+          "name": "xdiff",
+          "status": "untracked"
+        },
+        {
+          "name": "ydiff",
+          "status": "untracked"
+        },
+        {
+          "name": "zdiff",
+          "status": "untracked"
+        }
+      ],
+      "aliasCollisions": [],
+      "sourceIndexLineCount": 195
+    },
+    {
+      "section": "targeters",
+      "expectedCatalogCount": 93,
+      "catalogCount": 93,
+      "nameRegistered": 93,
+      "documentedCount": 89,
+      "entrySpecificParameterCount": 18,
+      "fullyVerifiedCount": 0,
+      "fullyVerifiedNote": "Not assigned until all official pages, version constraints, aliases, and parameter schemas for the section have been audited.",
+      "officialIndexObservedCount": null,
+      "officialIndexObservationStatus": "not_observed_live_in_this_run",
+      "parameterScrapeWithRows": 0,
+      "parameterScrapeAliasOnly": 0,
+      "noParameterTable": 0,
+      "parseFailed": 0,
+      "notFetched": 0,
+      "untracked": 93,
+      "fetchStatusCounts": {
+        "http_404": 0,
+        "network_error": 0,
+        "source_missing": 0,
+        "stale_cache": 0,
+        "cached": 0,
+        "fetched": 0,
+        "local_file": 0
+      },
+      "unresolvedEntries": [
+        {
+          "name": "Self",
+          "status": "untracked"
+        },
+        {
+          "name": "Target",
+          "status": "untracked"
+        },
+        {
+          "name": "Trigger",
+          "status": "untracked"
+        },
+        {
+          "name": "Owner",
+          "status": "untracked"
+        },
+        {
+          "name": "Parent",
+          "status": "untracked"
+        },
+        {
+          "name": "Children",
+          "status": "untracked"
+        },
+        {
+          "name": "Passenger",
+          "status": "untracked"
+        },
+        {
+          "name": "Vehicle",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayersInRadius",
+          "status": "untracked"
+        },
+        {
+          "name": "EntitiesInRadius",
+          "status": "untracked"
+        },
+        {
+          "name": "MobsInRadius",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayersInWorld",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayersOnServer",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayersNearOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "EntitiesNearOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "NearestPlayer",
+          "status": "untracked"
+        },
+        {
+          "name": "NearestEntity",
+          "status": "untracked"
+        },
+        {
+          "name": "ThreatTable",
+          "status": "untracked"
+        },
+        {
+          "name": "ThreatTablePlayers",
+          "status": "untracked"
+        },
+        {
+          "name": "TargetLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "SelfLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "TriggerLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "Origin",
+          "status": "untracked"
+        },
+        {
+          "name": "Location",
+          "status": "untracked"
+        },
+        {
+          "name": "Forward",
+          "status": "untracked"
+        },
+        {
+          "name": "Ring",
+          "status": "untracked"
+        },
+        {
+          "name": "Sphere",
+          "status": "untracked"
+        },
+        {
+          "name": "Cone",
+          "status": "untracked"
+        },
+        {
+          "name": "LineOfSight",
+          "status": "untracked"
+        },
+        {
+          "name": "TargetedLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "RandomLocationsNearCaster",
+          "status": "untracked"
+        },
+        {
+          "name": "RandomLocationsNearTargets",
+          "status": "untracked"
+        },
+        {
+          "name": "MobsInWorld",
+          "status": "untracked"
+        },
+        {
+          "name": "Players",
+          "status": "untracked"
+        },
+        {
+          "name": "WolfOwner",
+          "status": "untracked"
+        },
+        {
+          "name": "Mount",
+          "status": "untracked"
+        },
+        {
+          "name": "Father",
+          "status": "untracked"
+        },
+        {
+          "name": "Mother",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayerByName",
+          "status": "untracked"
+        },
+        {
+          "name": "UniqueIdentifier",
+          "status": "untracked"
+        },
+        {
+          "name": "InteractionLastAttacker",
+          "status": "untracked"
+        },
+        {
+          "name": "InteractionLastInteract",
+          "status": "untracked"
+        },
+        {
+          "name": "OwnerLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "ParentLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "LivingInCone",
+          "status": "untracked"
+        },
+        {
+          "name": "LivingInWorld",
+          "status": "untracked"
+        },
+        {
+          "name": "NotLivingNearOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "EntitiesInRing",
+          "status": "untracked"
+        },
+        {
+          "name": "EntitiesInRingNearOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayersInRing",
+          "status": "untracked"
+        },
+        {
+          "name": "TrackedPlayers",
+          "status": "untracked"
+        },
+        {
+          "name": "MobsNearOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "Siblings",
+          "status": "untracked"
+        },
+        {
+          "name": "ItemsNearOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "ItemsInRadius",
+          "status": "untracked"
+        },
+        {
+          "name": "RandomThreatTarget",
+          "status": "untracked"
+        },
+        {
+          "name": "RandomThreatTargetLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "SelfEyeLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "ProjectileForward",
+          "status": "untracked"
+        },
+        {
+          "name": "TargetPredictedLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "SpawnLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "CasterSpawnLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "ObstructingBlock",
+          "status": "untracked"
+        },
+        {
+          "name": "TargetBlock",
+          "status": "untracked"
+        },
+        {
+          "name": "TrackedLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "NearestStructure",
+          "status": "untracked"
+        },
+        {
+          "name": "VariableLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "HighestBlock",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayerLocationByName",
+          "status": "untracked"
+        },
+        {
+          "name": "EscapeLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "ForwardWall",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayerLocationsInRadius",
+          "status": "untracked"
+        },
+        {
+          "name": "Pin",
+          "status": "untracked"
+        },
+        {
+          "name": "RandomRingPoint",
+          "status": "untracked"
+        },
+        {
+          "name": "Rectangle",
+          "status": "untracked"
+        },
+        {
+          "name": "RandomLocationsNearOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "BlocksNearOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "RingAroundOrigin",
+          "status": "untracked"
+        },
+        {
+          "name": "Spawners",
+          "status": "untracked"
+        },
+        {
+          "name": "BlocksInPinRegion",
+          "status": "untracked"
+        },
+        {
+          "name": "ChunksInWERegion",
+          "status": "untracked"
+        },
+        {
+          "name": "LivingInLine",
+          "status": "untracked"
+        },
+        {
+          "name": "LivingNearTargetLocation",
+          "status": "untracked"
+        },
+        {
+          "name": "PlayersNearTargetLocations",
+          "status": "untracked"
+        },
+        {
+          "name": "TargetedTarget",
+          "status": "untracked"
+        },
+        {
+          "name": "Line",
+          "status": "untracked"
+        },
+        {
+          "name": "FloorOfTargets",
+          "status": "untracked"
+        },
+        {
+          "name": "LocationsOfTargets",
+          "status": "untracked"
+        },
+        {
+          "name": "BlocksInRadius",
+          "status": "untracked"
+        },
+        {
+          "name": "BlocksInChunk",
+          "status": "untracked"
+        },
+        {
+          "name": "BlockVein",
+          "status": "untracked"
+        },
+        {
+          "name": "None",
+          "status": "untracked"
+        },
+        {
+          "name": "Region",
+          "status": "untracked"
+        }
+      ],
+      "aliasCollisions": [],
+      "sourceIndexLineCount": 89
+    },
+    {
+      "section": "placeholders",
+      "sourceListRows": 142,
+      "catalogCount": 278,
+      "nameRegistered": 278,
+      "officialIndexObservedCount": null,
+      "officialIndexObservationStatus": "not_observed_live_in_this_run",
+      "documentedCount": 274,
+      "parameterScrapeWithRows": null,
+      "fullyVerifiedCount": 0,
+      "unresolvedCount": 278,
+      "note": "Placeholder rows are curated source-list entries; argument-level parsing is not implemented as a per-page scrape, so complete argument coverage is unverified."
+    }
+  ],
+  "overall": {
+    "auditPassed": false,
+    "networkRefreshAttempted": false,
+    "unresolvedEntryCount": 865,
+    "liveOfficialIndexCountsObserved": false
+  },
+  "limitations": [
+    "Catalog list counts are compared with configured reference counts; they are not proof that all official pages were fetched.",
+    "A page with no detected parameter table is not considered verified parameterless.",
+    "Placeholder argument signatures are not exhaustively parsed by the per-entry parameter scraper."
+  ]
+}

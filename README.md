@@ -176,6 +176,34 @@ parameter values) plus server-side structural validation on save; a conservative
 that never reorders keys or drops comments; a `#RRGGBB` color picker; Ctrl+S / Ctrl+Space / Ctrl+Z /
 Ctrl+Shift+Z / Ctrl+F all work through Monaco's standard keybindings.
 
+**Tab completion / autocomplete details** — typing a prefix shows ranked candidates and **Tab** (or Enter) accepts
+the highlighted one: `dama` → `damage` / `damagepercent`, `effect:part` → `effect:particles`, `@PI` → `PlayersInRadius`
+(alias `PIR`), `?hea` → inline condition `health`, `~onTi` → `onTimer`. Inside `{...}` of a **mechanic, `@targeter` or
+condition** every documented attribute *and its aliases* is offered, together with the attributes shared by all
+mechanics (`cooldown`, `delay`, `repeat`, `chance`, `power`, ...) or all targeters (`targetconditions`, `fallback`, ...);
+keys already written in the same block are not offered again; accepting a key opens the value list straight away
+(`true/false`, enums, Skill/Mob names, comma-separated lists, the documented default). After a complete condition in a
+`Conditions:` list the condition actions (`true`, `false`, `power`, `cast`, `castinstead`, `orElseCast`) are offered,
+and a skill name after `cast*`. Hovering a parameter key shows its description, aliases and default. Parameters the
+wiki does not list for a documented mechanic are reported as an *Info* diagnostic (never an error).
+
+### Keeping the catalog in sync with the MythicCraft wiki
+
+The names, aliases and descriptions of every wiki Mechanic / Condition / Targeter / Trigger / Placeholder / AI goal
+are in `tools/catalog/data/*.txt`. The **parameters** are scraped from each page's attribute table:
+
+```bash
+python3 tools/catalog/scrape_wiki.py     # ~600 pages, cached in tools/catalog/.cache (needs internet; stdlib only)
+python3 tools/catalog/build_catalog.py   # merges everything into core/src/main/resources/catalog/mythicmobs-5.json
+./gradlew :core:test                     # asserts the catalog still loads and exposes the shared attributes
+```
+
+`scrape_wiki.py` options: `--kind mechanics|conditions|targeters`, `--only damage,heal`, `--refresh`, `--from-dir DIR`
+(parse saved `<name>.html` files offline). Wiki parameters decide *which* attributes exist, their aliases and defaults;
+the hand-written `base-catalog.json` keeps authority over richer typing (`enum:`, `skill`, `mob`, required) and any
+attribute the wiki page omits is kept, never dropped. Parser tests: `python3 tools/catalog/tests/test_scrape.py`;
+completion logic tests: `cd web && npm test`.
+
 **Visual Editor** — structured forms for a Mob's `Type`/`Display`/`Health`/`Damage`/`Armor`/`Faction`/
 `Template`, `Options` toggles, `Equipment`/`Drops`/`AIGoalSelectors`/`AITargetSelectors` list rows, and a
 card-based editor for `Skills:` lines (mechanic + parameters + targeter + trigger, add/remove/reorder).
@@ -211,3 +239,64 @@ description of *which IDE features matter* for MythicMobs specifically (completi
 definition, a formatter, created-content completion) — this project's Monaco-based implementation
 (`core/` catalog format, `context.ts`'s scanner, the completion/diagnostics providers) is independent code
 written against MythicMobs' public skill-line syntax, not against MythicScribe's source.
+
+
+## Refreshing MythicMobs parameter metadata
+
+The bundled reference catalog includes the wiki-indexed names for mechanics, conditions,
+targeters, triggers, and placeholders. Not every wiki index entry includes its full parameter
+table, so the repository now includes a metadata refresh script:
+
+```bash
+python -m pip install requests beautifulsoup4
+python tools/catalog/fetch_parameters.py
+python tools/catalog/audit_catalog.py
+```
+
+The bundled catalog currently has all indexed names: **303 Mechanics, 197 Conditions, and 93 Targeters**.
+The Monaco completion provider supports prefix search (for example, `dama` suggests `damage`), aliases,
+entry-specific parameter names/values, and shared mechanic/targeter attributes. The updater imports
+recognizable parameter tables from the official pages linked in the catalog and preserves existing data
+when a page cannot be parsed. It writes `parameter-refresh-report.txt` next to the catalog so missing pages
+and unrecognized table layouts are visible rather than silently treated as complete.
+
+**Important:** name coverage is not the same as parameter-table coverage. The audit reports these separately;
+run it after every refresh and review any entries without individual parameter metadata. The current bundled
+snapshot does not yet contain a verified per-entry parameter table for every listed item. Some entries may be
+parameterless, documented differently, added by an addon, or version-specific. Do not treat a clean name-count
+audit as proof that every parameter is documented. Test against the exact MythicMobs version installed on
+your server.
+
+In the Monaco editor, mechanic names and their aliases are included in the completion search
+corpus, so partial input can find the canonical entry (for example, typing `dama` can suggest
+`damage`). Parameter completion remains available inside mechanic/condition/targeter braces,
+and the shared attributes are appended to mechanic and targeter suggestions.
+
+## MythicMobs catalog maintenance and coverage audit
+
+The bundled catalog is intentionally usable offline. Its names and parameter metadata are **not** assumed to be complete merely because an item exists in the editor's completion list.
+
+From the repository root, with Python 3.10+:
+
+```bash
+# Rebuild the bundled catalog from the checked-in source lists and cached parameter data
+python tools/catalog/build_catalog.py
+
+# Audit bundled names separately from per-page parameter extraction
+python tools/catalog/audit_catalog.py
+
+# Refresh official wiki pages (requires network access; may take several minutes)
+python tools/catalog/fetch_parameters.py
+```
+
+The scraper stores HTML under `tools/catalog/.cache/`, extracted parameter rows under `tools/catalog/data/params/`, and per-entry fetch/parse state in `*-scrape-status.json`. A refresh preserves last-known-good parameter records if the network or parser fails; failed requests are recorded as unresolved rather than treated as parameterless features. The audit emits both `catalog-audit-report.json` and `parameter-refresh-report.txt`.
+
+Current checked-in coverage is partial: the bundled catalog has 303 mechanics, 197 conditions, and 93 targeters, but many individual parameter pages remain uncollected or unresolved. Placeholder names are bundled, but exhaustive argument-signature validation is not yet implemented. The audit deliberately exits non-zero while unresolved records remain. Network-dependent scraping and frontend/Gradle builds may need to be run in an environment with access to the relevant package registries and official wiki.
+
+### Current catalog verification status
+
+The latest machine-readable and human-readable audit reports are in `tools/catalog/data/params/`. See `implementation-verification-report.md` for the exact checks that passed, checks blocked by missing network/dependencies, current parameter coverage, and remaining work. The project is **not** considered fully verified until all official pages and all application tests have been checked successfully.
+
+## Latest implementation and verification report
+
+See [`WORK_REPORT.md`](WORK_REPORT.md) for the 2026-10-11 code changes, test/build outcomes, current catalog coverage and unresolved tasks. In particular, the checked-in catalog counts are local counts, not a live measurement of the official wiki; the full web and Gradle builds could not be verified in the restricted environment. Do not treat the catalog as fully audited until the report's unresolved items are addressed.
