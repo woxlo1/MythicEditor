@@ -27,7 +27,7 @@ final class Api {
 
     Api(EditorHttpServer core) {
         this.core = core;
-        this.guard = new ContentGuard(core.core.settings.restrictedMechanics);
+        this.guard = new ContentGuard(core.core.settings.restrictedMechanics, core.core.settings.allowedMechanics);
     }
 
     /**

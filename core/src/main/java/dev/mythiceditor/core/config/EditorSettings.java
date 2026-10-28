@@ -44,6 +44,8 @@ public final class EditorSettings {
      */
     public List<String> restrictedMechanics = new ArrayList<>(List.of(
         "command", "cmd", "consolecommand", "playercommand", "runcommand", "executecommand"));
+    /** Optional allow-list for mechanics; if non-empty, players without mythiceditor.unrestricted may only ADD mechanics in this list. */
+    public List<String> allowedMechanics = new ArrayList<>();
 
     /**
      * Relay mode: the plugin connects OUT to a Cloudflare Worker (relay-worker/), which forwards browser requests
@@ -176,6 +178,12 @@ public final class EditorSettings {
         if (sec.containsKey("restricted-mechanics")) {
             s.restrictedMechanics = new ArrayList<>(strList(sec.get("restricted-mechanics")).stream()
                 .map(x -> x.trim().toLowerCase(java.util.Locale.ROOT)).filter(x -> !x.isEmpty()).toList());
+        }
+        if (sec.containsKey("allowed-mechanics")) {
+            s.allowedMechanics = new ArrayList<>(strList(sec.get("allowed-mechanics")).stream()
+                .map(x -> x.trim().toLowerCase(java.util.Locale.ROOT)).filter(x -> !x.isEmpty()).toList());
+        } else {
+            s.allowedMechanics = new ArrayList<>();
         }
 
         Map<?, ?> relay = map(root, "relay");

@@ -27,14 +27,22 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
  * knows the mechanic names it is configured with (see {@code security.restricted-mechanics}).
  */
 public final class ContentGuard {
-    // optional list dash / quotes, the mechanic name, optional spaces, then "{" (mechanic options)
-    private static final Pattern LINE = Pattern.compile("^[\\s\\-'\"]*([A-Za-z0-9_]+)\\s*\\{");
+    // optional list dash / quotes, the mechanic name, followed by {, [, whitespace+@/~/? , or end of line (conservative)
+    private static final Pattern LINE = Pattern.compile("^[\\s\\-'\"]*([A-Za-z0-9_]+)\\s*(\\{|\\[|[ \\t]+[@~?]|$)");
 
     private final Set<String> restricted = new HashSet<>();
+    private final Set<String> allowed = new HashSet<>();
 
     public ContentGuard(Collection<String> names) {
+        this(names, java.util.Collections.emptyList());
+    }
+
+    public ContentGuard(Collection<String> names, Collection<String> allowedList) {
         for (String n : names) {
             if (n != null && !n.isBlank()) restricted.add(n.trim().toLowerCase(Locale.ROOT));
+        }
+        for (String n : allowedList == null ? java.util.Collections.emptyList() : allowedList) {
+            if (n != null && !n.isBlank()) allowed.add(n.trim().toLowerCase(Locale.ROOT));
         }
     }
 
@@ -42,10 +50,19 @@ public final class ContentGuard {
         return !restricted.isEmpty();
     }
 
+    public boolean hasAllowList() {
+        return !allowed.isEmpty();
+    }
+
+    public Set<String> allowedMechanics() {
+        return allowed;
+    }
+
     /** Every restricted line (trimmed) found in the YAML text, duplicates included. Unparseable YAML yields none. */
     public List<String> restrictedLines(String yaml) {
         List<String> out = new ArrayList<>();
-        if (!enabled() || yaml == null || yaml.isBlank()) return out;
+        if (yaml == null || yaml.isBlank()) return out;
+        if (!enabled() && !hasAllowList()) return out;
         Object doc;
         try {
             doc = newYaml().load(yaml);
@@ -80,7 +97,13 @@ public final class ContentGuard {
         if (node instanceof String s) {
             for (String line : s.split("\\R")) {
                 Matcher m = LINE.matcher(line);
-                if (m.find() && restricted.contains(m.group(1).toLowerCase(Locale.ROOT))) out.add(line.trim());
+                if (!m.find()) continue;
+                String mech = m.group(1).toLowerCase(Locale.ROOT);
+                boolean isRestricted = restricted.contains(mech);
+                boolean blockedByAllowList = hasAllowList() && !allowed.contains(mech);
+                if (isRestricted || blockedByAllowList) {
+                    out.add(line.trim());
+                }
             }
         } else if (node instanceof Map<?, ?> map) {
             for (Map.Entry<?, ?> e : map.entrySet()) {
