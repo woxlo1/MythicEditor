@@ -68,9 +68,10 @@ final class Api {
     }
 
     void logout(Ctx ctx) throws IOException {
-        String sid = ctx.cookies().get(EditorHttpServer.COOKIE);
+        String cookieName = core.sessionCookieName();
+        String sid = ctx.cookies().get(cookieName);
         if (sid != null) core.core.sessions.invalidate(sid);
-        ctx.clearCookie(EditorHttpServer.COOKIE);
+        ctx.clearCookie(cookieName);
         ctx.sendJson(200, Map.of("ok", true));
     }
 

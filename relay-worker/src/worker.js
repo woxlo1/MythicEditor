@@ -23,10 +23,41 @@ const FORWARD_REQUEST_HEADERS = [
 ];
 // Never copied from the plugin's answer (the runtime sets them itself).
 const DROP_RESPONSE_HEADERS = new Set(["connection", "keep-alive", "transfer-encoding", "content-length", "upgrade"]);
+// Security headers that must be enforced by the Worker (same policy as the plugin).
+const PLUGIN_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
+const FORCE_RESPONSE_HEADERS = {
+  "content-security-policy": PLUGIN_CSP,
+  "x-frame-options": "DENY",
+  "x-content-type-options": "nosniff",
+};
 
 const MAIN = "main";
 const ID_RE = /^[a-z0-9][a-z0-9-]{1,30}$/;
 const ROUTE_COOKIE = "me_srv";
+const SESSION_COOKIE_DEFAULT = "mythiceditor_sid";
+
+function sessionCookieNameFor(id) {
+  if (!id || id === MAIN) return SESSION_COOKIE_DEFAULT;
+  if (!ID_RE.test(id) || id === MAIN) return SESSION_COOKIE_DEFAULT;
+  return SESSION_COOKIE_DEFAULT + "_" + id;
+}
+
+function filterRequestCookieHeader(cookieHeader, allowedCookieName) {
+  if (!cookieHeader || !allowedCookieName) return cookieHeader || "";
+  const parts = cookieHeader.split(";");
+  const kept = [];
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const idx = part.indexOf("=");
+    if (idx <= 0) continue;
+    const name = part.slice(0, idx).trim();
+    // Only forward the session cookie for the target server; drop me_srv and others (including other servers' session cookies)
+    if (name === allowedCookieName) {
+      kept.push(part.trim());
+    }
+  }
+  return kept.join("; ");
+}
 
 export default {
   async fetch(request, env) {
@@ -34,6 +65,15 @@ export default {
 
     if (url.pathname === "/_relay/connect") return connect(request, env, url);
     if (url.pathname.startsWith("/_relay/")) return plain(404, "Not found.");
+
+    // Routing switch for /editor/* and /s/* must only be accepted on document navigations (Sec-Fetch-Dest: document).
+    // fetch() based switches are rejected with 400. If header is missing (old browsers), we choose to reject for safety.
+    if (url.pathname.startsWith("/editor/") || /^\/s\/[^/]+(\/.*)?$/.test(url.pathname)) {
+      const dest = request.headers.get("sec-fetch-dest");
+      if (dest !== "document") {
+        return plain(400, "Bad request.");
+      }
+    }
 
     // Which server is this browser talking to?
     let id = MAIN;
@@ -72,6 +112,7 @@ export default {
 
 async function connect(request, env, url) {
   if (!env.RELAY_SECRET) return plain(503, "RELAY_SECRET is not set on this Worker.");
+  if (env.RELAY_SECRET.length < 16) return plain(503, "RELAY_SECRET is too short.");
   if (request.headers.get("Upgrade") !== "websocket") return plain(426, "WebSocket required.");
   const given = request.headers.get("Authorization") || "";
   const idParam = url.searchParams.get("id");
@@ -115,12 +156,34 @@ export class Relay {
     this.env = env;
     /** request id -> { resolve, conn, timer }   (only lives while the request is waiting, so no storage needed) */
     this.pending = new Map();
+    // Simple per-IP rate limit (memory only). Entries cleaned up periodically.
+    this.rateMap = new Map();
     // Keep-alive pings from the plugin are answered without waking the object up.
     this.state.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
 
   async fetch(request) {
     if (request.headers.get("Upgrade") === "websocket") return this.accept();
+    // Rate limit per cf-connecting-ip (120 req/min). If over limit, return 429.
+    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const now = Date.now();
+    // cleanup
+    for (const [k, v] of this.rateMap) {
+      if (now - v.windowStart > 60000) this.rateMap.delete(k);
+    }
+    const entry = this.rateMap.get(ip) || { windowStart: now, count: 0 };
+    if (now - entry.windowStart > 60000) {
+      entry.windowStart = now;
+      entry.count = 0;
+    }
+    entry.count++;
+    this.rateMap.set(ip, entry);
+    if (entry.count > 120) {
+      return new Response(JSON.stringify({ error: { code: "rate_limited", message: "Too many requests" } }), {
+        status: 429,
+        headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "retry-after": "60" },
+      });
+    }
     return this.proxy(request);
   }
 
@@ -154,9 +217,27 @@ export class Relay {
     }
 
     const headers = {};
+    // Determine target server id from route cookie/path context - we need to know it; reconstruct from request URL path? 
+    // But Durable Object is per server id; the fetch comes in via stub for specific id. We don't know id here directly,
+    // but we can infer from cookie if present. Also main uses no suffix.
+    let targetId = null;
+    // Try to read route cookie
+    const route = readCookie(request, ROUTE_COOKIE);
+    if (route && route !== MAIN && ID_RE.test(route)) targetId = route;
+    // else main
+
+    const allowedCookie = sessionCookieNameFor(targetId || MAIN);
     for (const name of FORWARD_REQUEST_HEADERS) {
       const v = request.headers.get(name);
-      if (v !== null) headers[name] = v;
+      if (v !== null) {
+        if (name === "cookie") {
+          const filtered = filterRequestCookieHeader(v, allowedCookie);
+          if (filtered) headers[name] = filtered;
+          // drop others entirely
+        } else {
+          headers[name] = v;
+        }
+      }
     }
     headers["x-forwarded-for"] = request.headers.get("cf-connecting-ip") || "";
     headers["x-forwarded-proto"] = "https";
@@ -182,7 +263,7 @@ export class Relay {
     const res = await answer;
     if (res.error === "timeout") return plain(504, "The Minecraft server did not answer in time.");
     if (res.error) return offlinePage();
-    return toResponse(res, request.method === "HEAD");
+    return toResponse(res, request.method === "HEAD", request);
   }
 
   settle(id, value) {
@@ -223,15 +304,54 @@ export class Relay {
 
 // ---- helpers ---------------------------------------------------------------------------------------------------
 
-function toResponse(msg, isHead) {
+function toResponse(msg, isHead, request) {
   const status = Number.isInteger(msg.status) && msg.status >= 200 && msg.status <= 599 ? msg.status : 502;
   const headers = new Headers();
+  // Determine allowed session cookie name from context? We don't have request here; but we need to filter Set-Cookie.
+  // Best effort: try to read from msg context is not available - to be safe, drop Set-Cookie unless it matches known patterns
+  // and we don't know target; but DO is per-server, harder to tell. However per requirement (c): "Worker  Set-Cookie 、"
+  // We need to know which server this DO belongs to? Not directly passed. As a safe approach, drop all Set-Cookie from plugin
+  // except if we can determine - but easier to track via a different mechanism; alternatively, look up route cookie isn't possible here.
+  // But the DO is obtained by idFromName(id) in fetch; in our proxy call the DO instance is tied to specific id? Wait - in the default worker fetch, we get stub = env.RELAY.get(env.RELAY.idFromName(id)) and call stub.fetch with modified request.
+  // But inside DO.fetch we don't know which id it is. Alternative: pass id via header we add? Let us check - in default fetch we pass original request or new Request(target,...request) which copies headers; we could add a header.
+  // But we need to modify. Easier to handle in default fetch level? Or just be conservative: only allow Set-Cookie if it matches mythiceditor_sid or mythiceditor_sid_<id> where id matches route cookie? We can try to read route cookie from the request that came into DO? The DO.fetch receives the Request object passed from stub.fetch - we passed it through; original request had cookies. Also we can look up route cookie again.
+  // But in the current flow, in default worker we call stub.fetch(target === url ? request : new Request(target.toString(), request)) - so headers preserved. Yes.
+  // So in toResponse we don't have request; better to filter in DO.proxy after getting response? Or change approach.
+  // Alternatively, move filtering to where we have context - in proxy, after getting res from plugin via the frame? Wait - the plugin sends response back through WebSocket frame to DO; DO receives it as msg in webSocketMessage and calls settle, then proxy awaits answer and calls toResponse(res,...). So we have 'request' in proxy scope.
+  
+  const route = readCookie(request, ROUTE_COOKIE);
+  let targetId = (route && route !== MAIN && ID_RE.test(route)) ? route : MAIN;
+  const allowedCookie = sessionCookieNameFor(targetId);
+
   for (const [name, values] of Object.entries(msg.headers || {})) {
-    if (DROP_RESPONSE_HEADERS.has(name.toLowerCase())) continue;
+    const lower = name.toLowerCase();
+    if (DROP_RESPONSE_HEADERS.has(lower)) continue;
+    if (lower === "set-cookie") {
+      // Filter: only keep cookies for target server session cookie name
+      for (const v of Array.isArray(values) ? values : [values]) {
+        try {
+          const strv = String(v);
+          // Check cookie name
+          const idx = strv.indexOf("=");
+          if (idx > 0) {
+            const cname = strv.slice(0, idx).trim();
+            if (cname === allowedCookie) {
+              headers.append(name, strv);
+            }
+            // else drop
+          }
+        } catch (_) { /* skip */ }
+      }
+      continue;
+    }
     for (const v of Array.isArray(values) ? values : [values]) {
       try { headers.append(name, String(v)); } catch (_) { /* invalid header, skip */ }
     }
   }
+  // Enforce security headers (overwrite)
+  headers.set("Content-Security-Policy", PLUGIN_CSP);
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("X-Content-Type-Options", "nosniff");
   const noBody = isHead || status === 204 || status === 304 || !msg.body;
   // encodeBody "manual": the plugin already gzip-compressed the body and says so in Content-Encoding. Without this the
   // runtime would assume the body is plain and compress it a second time.

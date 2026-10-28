@@ -23,10 +23,40 @@ const FORWARD_REQUEST_HEADERS = [
 ];
 // Never copied from the plugin's answer (the runtime sets them itself).
 const DROP_RESPONSE_HEADERS = new Set(["connection", "keep-alive", "transfer-encoding", "content-length", "upgrade"]);
+// Security headers that must be enforced by the Worker (same policy as the plugin).
+const PLUGIN_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'";
+const FORCE_RESPONSE_HEADERS = {
+  "content-security-policy": PLUGIN_CSP,
+  "x-frame-options": "DENY",
+  "x-content-type-options": "nosniff",
+};
 
 const MAIN = "main";
 const ID_RE = /^[a-z0-9][a-z0-9-]{1,30}$/;
 const ROUTE_COOKIE = "me_srv";
+const SESSION_COOKIE_DEFAULT = "mythiceditor_sid";
+
+function sessionCookieNameFor(id) {
+  if (!id || id === MAIN) return SESSION_COOKIE_DEFAULT;
+  if (!ID_RE.test(id) || id === MAIN) return SESSION_COOKIE_DEFAULT;
+  return SESSION_COOKIE_DEFAULT + "_" + id;
+}
+
+function filterRequestCookieHeader(cookieHeader, allowedCookieName) {
+  if (!cookieHeader || !allowedCookieName) return cookieHeader || "";
+  const parts = cookieHeader.split(";");
+  const kept = [];
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+    const idx = part.indexOf("=");
+    if (idx <= 0) continue;
+    const name = part.slice(0, idx).trim();
+    if (name === allowedCookieName) {
+      kept.push(part.trim());
+    }
+  }
+  return kept.join("; ");
+}
 
 export default {
   async fetch(request, env) {
@@ -34,6 +64,15 @@ export default {
 
     if (url.pathname === "/_relay/connect") return connect(request, env, url);
     if (url.pathname.startsWith("/_relay/")) return plain(404, "Not found.");
+
+    // Routing switch for /editor/* and /s/* must only be accepted on document navigations (Sec-Fetch-Dest: document).
+    // fetch() based switches are rejected with 400. If header is missing (old browsers), we choose to reject for safety.
+    if (url.pathname.startsWith("/editor/") || /^\/s\/[^/]+(\/.*)?$/.test(url.pathname)) {
+      const dest = request.headers.get("sec-fetch-dest");
+      if (dest !== "document") {
+        return plain(400, "Bad request.");
+      }
+    }
 
     // Which server is this browser talking to?
     let id = MAIN;
@@ -72,6 +111,7 @@ export default {
 
 async function connect(request, env, url) {
   if (!env.RELAY_SECRET) return plain(503, "RELAY_SECRET is not set on this Worker.");
+  if (env.RELAY_SECRET.length < 16) return plain(503, "RELAY_SECRET is too short.");
   if (request.headers.get("Upgrade") !== "websocket") return plain(426, "WebSocket required.");
   const given = request.headers.get("Authorization") || "";
   const idParam = url.searchParams.get("id");
@@ -115,12 +155,33 @@ export class Relay {
     this.env = env;
     /** request id -> { resolve, conn, timer }   (only lives while the request is waiting, so no storage needed) */
     this.pending = new Map();
+    // Simple per-IP rate limit (memory only). Entries cleaned up periodically.
+    this.rateMap = new Map();
     // Keep-alive pings from the plugin are answered without waking the object up.
     this.state.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
   }
 
   async fetch(request) {
     if (request.headers.get("Upgrade") === "websocket") return this.accept();
+    // Rate limit per cf-connecting-ip (120 req/min). If over limit, return 429.
+    const ip = request.headers.get("cf-connecting-ip") || "unknown";
+    const now = Date.now();
+    for (const [k, v] of this.rateMap) {
+      if (now - v.windowStart > 60000) this.rateMap.delete(k);
+    }
+    const entry = this.rateMap.get(ip) || { windowStart: now, count: 0 };
+    if (now - entry.windowStart > 60000) {
+      entry.windowStart = now;
+      entry.count = 0;
+    }
+    entry.count++;
+    this.rateMap.set(ip, entry);
+    if (entry.count > 120) {
+      return new Response(JSON.stringify({ error: { code: "rate_limited", message: "Too many requests" } }), {
+        status: 429,
+        headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "retry-after": "60" },
+      });
+    }
     return this.proxy(request);
   }
 
@@ -154,9 +215,20 @@ export class Relay {
     }
 
     const headers = {};
+    let targetId = null;
+    const route = readCookie(request, ROUTE_COOKIE);
+    if (route && route !== MAIN && ID_RE.test(route)) targetId = route;
+    const allowedCookie = sessionCookieNameFor(targetId || MAIN);
     for (const name of FORWARD_REQUEST_HEADERS) {
       const v = request.headers.get(name);
-      if (v !== null) headers[name] = v;
+      if (v !== null) {
+        if (name === "cookie") {
+          const filtered = filterRequestCookieHeader(v, allowedCookie);
+          if (filtered) headers[name] = filtered;
+        } else {
+          headers[name] = v;
+        }
+      }
     }
     headers["x-forwarded-for"] = request.headers.get("cf-connecting-ip") || "";
     headers["x-forwarded-proto"] = "https";
@@ -182,7 +254,7 @@ export class Relay {
     const res = await answer;
     if (res.error === "timeout") return plain(504, "The Minecraft server did not answer in time.");
     if (res.error) return offlinePage();
-    return toResponse(res, request.method === "HEAD");
+    return toResponse(res, request.method === "HEAD", request);
   }
 
   settle(id, value) {
@@ -223,18 +295,39 @@ export class Relay {
 
 // ---- helpers ---------------------------------------------------------------------------------------------------
 
-function toResponse(msg, isHead) {
+function toResponse(msg, isHead, request) {
   const status = Number.isInteger(msg.status) && msg.status >= 200 && msg.status <= 599 ? msg.status : 502;
   const headers = new Headers();
+  const route = readCookie(request, ROUTE_COOKIE);
+  let targetId = (route && route !== MAIN && ID_RE.test(route)) ? route : MAIN;
+  const allowedCookie = sessionCookieNameFor(targetId);
+
   for (const [name, values] of Object.entries(msg.headers || {})) {
-    if (DROP_RESPONSE_HEADERS.has(name.toLowerCase())) continue;
+    const lower = name.toLowerCase();
+    if (DROP_RESPONSE_HEADERS.has(lower)) continue;
+    if (lower === "set-cookie") {
+      for (const v of Array.isArray(values) ? values : [values]) {
+        try {
+          const strv = String(v);
+          const idx = strv.indexOf("=");
+          if (idx > 0) {
+            const cname = strv.slice(0, idx).trim();
+            if (cname === allowedCookie) {
+              headers.append(name, strv);
+            }
+          }
+        } catch (_) { /* skip */ }
+      }
+      continue;
+    }
     for (const v of Array.isArray(values) ? values : [values]) {
       try { headers.append(name, String(v)); } catch (_) { /* invalid header, skip */ }
     }
   }
+  headers.set("Content-Security-Policy", PLUGIN_CSP);
+  headers.set("X-Frame-Options", "DENY");
+  headers.set("X-Content-Type-Options", "nosniff");
   const noBody = isHead || status === 204 || status === 304 || !msg.body;
-  // encodeBody "manual": the plugin already gzip-compressed the body and says so in Content-Encoding. Without this the
-  // runtime would assume the body is plain and compress it a second time.
   return new Response(noBody ? null : base64ToBytes(msg.body), { status, headers, encodeBody: "manual" });
 }
 

@@ -21,7 +21,10 @@ import dev.mythiceditor.core.service.EditorCore;
  * Built on the JDK's com.sun.net.httpserver so the plugin ships with zero extra runtime dependencies.
  */
 public final class EditorHttpServer {
-    public static final String COOKIE = "mythiceditor_sid";
+    /** Default cookie name for the main/default server. */
+    public static final String DEFAULT_COOKIE = "mythiceditor_sid";
+    /** Legacy static constant kept for backward compatibility in external code paths. */
+    public static final String COOKIE = DEFAULT_COOKIE;
     private static final Set<String> WRITE_METHODS = Set.of("POST", "PUT", "DELETE", "PATCH");
 
     public final EditorCore core;
@@ -41,6 +44,15 @@ public final class EditorHttpServer {
         this.mainThread = mainThread;
         this.log = log;
         this.bootMessage = bootMessage;
+    }
+
+    /** Session cookie name derived from relay server id (main uses the default name). */
+    public String sessionCookieName() {
+        var settings = core.settings;
+        String sid = settings == null ? "" : (settings.relayServerId == null ? "" : settings.relayServerId.trim());
+        if (sid.isEmpty()) return DEFAULT_COOKIE;
+        // Only alphanumeric/hyphen as per relay id rules; keep simple and safe
+        return DEFAULT_COOKIE + "_" + sid;
     }
 
     public void start() throws IOException {
@@ -108,7 +120,7 @@ public final class EditorHttpServer {
                 ex.getResponseBody().close();
                 return;
             }
-            String cookie = COOKIE + "=" + s.token() + "; Path=/; SameSite=Strict; Max-Age=" + (core.settings.sessionMaxLifetimeMinutes * 60);
+            String cookie = sessionCookieName() + "=" + s.token() + "; Path=/; SameSite=Strict; Max-Age=" + (core.settings.sessionMaxLifetimeMinutes * 60);
             if (forwardedHttps(ex)) cookie += "; Secure";
             cookie += "; HttpOnly";
             ex.getResponseHeaders().add("Set-Cookie", cookie);
@@ -170,7 +182,7 @@ public final class EditorHttpServer {
             }
             ctx.trustedProxy = trustedProxyPeer(exchange);
             try {
-                String sid = ctx.cookies().get(COOKIE);
+                String sid = ctx.cookies().get(sessionCookieName());
                 SessionManager.Session session = sid == null ? null : core.sessions.touch(sid);
                 if (session == null) {
                     if (!core.loginLimiter.allow(clientIp(exchange))) {
