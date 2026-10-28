@@ -123,3 +123,30 @@ test("comment detection suppresses suggestions only outside quoted values", () =
   assert.equal(stripInlineComment('  - message{m="text # kept"} # removed'), '  - message{m="text # kept"}');
   assert.equal(stripInlineComment("  - damage{amount=5} # damage"), "  - damage{amount=5}");
 });
+
+test("whole-file editing: completion context is found inside the 2nd and 3rd entry of a multi-entry file", () => {
+  const file = [
+    "# my skills",
+    "First:",
+    "  Skills:",
+    "  - damage{amount=1} @Target",
+    "",
+    "# second one",
+    "Second:",
+    "  Conditions:",
+    "  - hea",
+    "",
+    "Third:",
+    "  Skills:",
+    "  - damage{amount=1;ia"
+  ].join("\n");
+  // inside Second -> Conditions (the nearest indent-2 key belongs to the entry above the cursor, not to First)
+  const secondEnd = file.indexOf("  - hea") + "  - hea".length;
+  assert.deepEqual(parseContext(file, secondEnd, "skill"), { area: "conditionsListMechanic", partial: "hea" });
+  // inside Third -> Skills, parameter name being typed
+  const c = parseContext(file, file.length, "skill");
+  assert.equal(c.area, "mechanicParamName");
+  // an entry-name line and a comment line at indent 0 offer nothing
+  assert.deepEqual(parseContext(file, file.indexOf("Second:") + 3, "skill"), { area: "none" });
+  assert.deepEqual(parseContext(file, "# my sk".length, "skill"), { area: "none" });
+});

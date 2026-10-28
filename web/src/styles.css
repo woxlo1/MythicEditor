@@ -181,3 +181,5 @@ table.entries tr:hover td { background: var(--bg-2); }
 
 a.mg-btn { display: inline-flex; align-items: center; text-decoration: none; color: inherit; cursor: pointer; }
 a.mg-btn:hover { background: var(--bg-3); }
+
+.mg-select { padding: 7px 10px; font-size: 14px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 4px; max-width: 240px; }

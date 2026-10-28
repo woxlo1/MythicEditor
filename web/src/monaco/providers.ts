@@ -407,13 +407,18 @@ export function computeDiagnostics(text: string, kind: EditorKind, ci: CatalogIn
   const diags: Diagnostic[] = [];
   const lines = text.split("\n");
   let section = "";
-  for (let i = 1; i < lines.length; i++) {
+  // Works for one entry (line 1 is its name) and for a whole file (several entries): every indent-0 line starts a new entry.
+  for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
     const active = stripInlineComment(raw);
     const indentMatch = /^(\s*)/.exec(active)!;
     const indent = indentMatch[1].length;
     const trimmed = active.trim();
     if (trimmed === "" || trimmed.startsWith("#")) continue;
+    if (indent === 0) {
+      section = "";
+      continue;
+    }
     if (indent === 2) {
       const km = /^([A-Za-z0-9_]+)\s*:/.exec(trimmed);
       if (km) section = km[1].toLowerCase();

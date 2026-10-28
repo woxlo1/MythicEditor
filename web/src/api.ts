@@ -1,5 +1,5 @@
 import type {
-  Catalog, ChangeItem, EntryFull, EntrySummary, GraphData, Kind, SessionInfo, StatusInfo
+  Catalog, ChangeItem, EntryFull, EntrySummary, FileFull, FileSummary, GraphData, Kind, SessionInfo, StatusInfo
 } from "./types";
 import { ApiError } from "./types";
 
@@ -73,9 +73,11 @@ export const Api = {
   duplicate: (kind: Kind, id: string, newId: string, file: string | null) =>
     request<EntryFull>("POST", `/api/${kind}s/${encodeURIComponent(id)}/duplicate`, { newId, file }),
 
-  files: (kind?: Kind) => request<{ items: { file: string; kind: string; entries: number; error: string; problems: string[] }[] }>(
-    "GET", `/api/files${kind ? `?kind=${kind}` : ""}`
-  ),
+  files: (kind?: Kind) => request<{ items: FileSummary[] }>("GET", `/api/files${kind ? `?kind=${kind}` : ""}`),
+  /** The complete text of one file (every entry, comment and blank line in it). */
+  file: (path: string) => request<FileFull>("GET", `/api/file?path=${encodeURIComponent(path)}`),
+  saveFile: (path: string, text: string, baseHash: string, force = false) =>
+    request<FileFull>("PUT", "/api/file", { path, text, baseHash, force }),
   definition: (kind: string, id: string) =>
     request<{ found: boolean; file?: string; line?: number; endLine?: number; ambiguous?: boolean }>(
       "GET", `/api/definition?kind=${encodeURIComponent(kind)}&id=${encodeURIComponent(id)}`

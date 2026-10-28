@@ -105,6 +105,19 @@ Origin / rate-limit check still applies. `/mythiceditor` then prints links on th
 turns on `security.trust-proxy-headers` automatically, and `web.public-url` defaults to `relay.url`.
 Several servers can share one Worker via `relay.server-id` (see `relay-worker/README.md`). Implementation: `core/.../web/RelayClient.java`.
 
+## Editing a whole file
+
+Besides the per-entry editor (one Skill/Mob block), the **📁 Files** page lists every YAML file below the configured
+MythicMobs folders and opens the **complete file** (all entries, comments and blank lines) in one Monaco buffer with the
+same completion, hover docs, diagnostics, formatter and Ctrl+S. From an entry, **ファイル全体を編集** opens the file that
+entry lives in, scrolled to it; an entry dropdown jumps between entries and F12 / Ctrl+Click follows references across files.
+
+Saving a whole file uses the same safety net as entry edits: external-change detection (against the file's SHA-256, with
+Reload / Overwrite), SnakeYAML validation (a valid file can never be turned into an invalid one), a timestamped backup,
+atomic write with read-back verification, the file's original line endings, the restricted-mechanic check
+(`mythiceditor.unrestricted`), and the usual CSRF / Origin / rate-limit / `mythiceditor.edit` gates. Only files inside the
+configured content folders are reachable. API: `GET /api/file?path=<rel>` and `PUT /api/file` `{path, text, baseHash, force}`.
+
 ## Configuration (`plugins/MythicEditor/config.yml`)
 
 Every path the editor will ever read or write is declared here — nothing is hard-coded in Java. Key

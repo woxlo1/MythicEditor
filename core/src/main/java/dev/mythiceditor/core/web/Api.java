@@ -192,6 +192,39 @@ final class Api {
         ctx.sendJson(200, Map.of("items", out));
     }
 
+    // ---- whole files ---------------------------------------------------------------------------------
+
+    void fileGet(Ctx ctx) throws IOException, StoreException {
+        FileStore.FileDoc f = core.core.store.readFile(requireQuery(ctx, "path"));
+        ctx.sendJson(200, fileJson(f));
+    }
+
+    void fileUpdate(Ctx ctx) throws IOException, StoreException {
+        JsonObject b = ctx.bodyJson(core.core.settings.maxRequestBytes);
+        String path = Json.str(b, "path");
+        if (path == null || path.isBlank()) throw new HttpEx(400, "bad_request", "Missing 'path'");
+        String text = Json.str(b, "text");
+        String baseHash = Json.str(b, "baseHash");
+        boolean force = Json.bool(b, "force");
+        if (guard.enabled() && text != null && !guard.added("", text).isEmpty()) {
+            requireNoNewRestrictedContent(ctx, core.core.store.readFile(path).text(), text);
+        }
+        FileStore.FileDoc f = core.core.store.saveFile(path, text, baseHash, force, actor(ctx));
+        ctx.sendJson(200, fileJson(f));
+    }
+
+    private static Map<String, Object> fileJson(FileStore.FileDoc f) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("file", f.file());
+        m.put("kind", f.kind());
+        m.put("text", f.text());
+        m.put("hash", f.hash());
+        m.put("mtime", f.mtime());
+        m.put("entries", f.entries());
+        m.put("warnings", f.warnings());
+        return m;
+    }
+
     void definition(Ctx ctx) throws IOException {
         String kind = requireQuery(ctx, "kind");
         String id = requireQuery(ctx, "id");

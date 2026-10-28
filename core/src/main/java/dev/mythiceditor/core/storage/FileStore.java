@@ -173,6 +173,106 @@ public final class FileStore {
         }
     }
 
+    // ---- whole file ---------------------------------------------------------------------------------
+
+    /** The complete text of one YAML file (as opposed to {@link Entry}, which is a single Skill/Mob block). */
+    public record FileDoc(String file, String kind, String text, String hash, long mtime, int entries, List<String> warnings) {
+        public FileDoc withWarnings(List<String> w) {
+            return new FileDoc(file, kind, text, hash, mtime, entries, w);
+        }
+    }
+
+    private static final int MAX_FILE_CHARS = 4 * 1024 * 1024;
+
+    /** Reads a whole file that belongs to one of the configured content folders. */
+    public FileDoc readFile(String rel) throws StoreException {
+        String kind = kindOfFile(rel);
+        Path path = resolveAnyIndexed(rel);
+        if (!Files.isRegularFile(path)) throw new StoreException("not_found", 404, "File '" + rel + "' was not found");
+        Loaded l = load(path);
+        return fileDoc(rel, kind, path, l, List.of());
+    }
+
+    /**
+     * Replaces the complete content of an existing file. Same safety net as entry edits (conflict check against the
+     * file hash, YAML validation, backup, atomic write, read-back verification, re-index) but nothing is spliced:
+     * the editor's text becomes the file. Line endings of the original file are kept.
+     */
+    public FileDoc saveFile(String rel, String newText, String baseHash, boolean force, String actor) throws StoreException {
+        String kind = kindOfFile(rel);
+        requireEditable(kind);
+        Path path = resolveAnyIndexed(rel);
+        String body = normalizeFileInput(newText);
+        if (body.length() > MAX_FILE_CHARS) throw new StoreException("invalid", 413, "File is too large");
+        ReentrantLock lock = lockFor(path);
+        lock.lock();
+        try {
+            if (!Files.isRegularFile(path)) throw new StoreException("not_found", 404, "File '" + rel + "' was not found");
+            Loaded l = load(path);
+            String currentHash = ProjectIndex.sha256(l.bytes);
+            if (!force && (baseHash == null || !baseHash.equals(currentHash))) {
+                throw fileConflict(rel, kind, l.raw, currentHash);
+            }
+            String eol = l.parsed.eol();
+            String newRaw = toEol(body, eol);
+            List<String> warnings = validateWhole(l.raw, newRaw, true);
+            if (newRaw.equals(l.raw)) return fileDoc(rel, kind, path, l, warnings);
+            commit(path, l.bytes, newRaw, kind);
+            changes.add(actor, "update-file", kind, null, rel);
+            return readFile(rel).withWarnings(warnings);
+        } catch (IOException e) {
+            throw io("save file", e);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private FileDoc fileDoc(String rel, String kind, Path path, Loaded l, List<String> warnings) {
+        long mtime = 0;
+        try {
+            mtime = Files.getLastModifiedTime(path).toMillis();
+        } catch (IOException | RuntimeException ignored) {
+            // informational only
+        }
+        return new FileDoc(rel, kind, l.raw.replace("\r\n", "\n"), ProjectIndex.sha256(l.bytes), mtime, l.parsed.blocks().size(), warnings);
+    }
+
+    private String kindOfFile(String rel) throws StoreException {
+        ProjectIndex.FileInfo f = index.file(rel);
+        if (f == null) throw new StoreException("not_found", 404, "File '" + rel + "' is not part of the indexed MythicMobs content");
+        return f.kind();
+    }
+
+    private Path resolveAnyIndexed(String rel) throws StoreException {
+        List<Path> dirs = new java.util.ArrayList<>();
+        for (List<Path> d : layout.resolveAll().values()) dirs.addAll(d);
+        try {
+            return guard.resolveYamlFile(rel, dirs);
+        } catch (SecurityException e) {
+            throw new StoreException("forbidden", 403, e.getMessage());
+        }
+    }
+
+    private static String normalizeFileInput(String text) throws StoreException {
+        if (text == null) throw new StoreException("invalid", 422, "Missing text");
+        String t = text.replace("\r\n", "\n").replace('\r', '\n');
+        if (t.indexOf('\0') >= 0) throw new StoreException("invalid", 422, "Text contains NUL characters");
+        if (t.startsWith("\uFEFF")) t = t.substring(1);
+        // exactly one trailing newline, like every well-formed text file (an empty file stays empty)
+        int end = t.length();
+        while (end > 0 && (t.charAt(end - 1) == '\n' || t.charAt(end - 1) == ' ' || t.charAt(end - 1) == '\t')) end--;
+        return end == 0 ? "" : t.substring(0, end) + "\n";
+    }
+
+    private StoreException fileConflict(String rel, String kind, String serverText, String serverHash) {
+        Map<String, Object> server = new LinkedHashMap<>();
+        server.put("text", serverText.replace("\r\n", "\n"));
+        server.put("hash", serverHash);
+        server.put("file", rel);
+        return new StoreException("conflict", 409, "File changed externally. '" + rel + "' was modified on the server after you opened it.",
+            null, Map.of("server", server));
+    }
+
     // ---- delete -------------------------------------------------------------------------------------
 
     public void delete(String kind, String id, String baseHash, boolean force, String actor) throws StoreException {

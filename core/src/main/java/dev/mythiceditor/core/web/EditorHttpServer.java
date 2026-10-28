@@ -142,6 +142,8 @@ public final class EditorHttpServer {
         }
 
         r.on("GET", "/api/files", api::files);
+        r.on("GET", "/api/file", api::fileGet);
+        r.on("PUT", "/api/file", api::fileUpdate);
         r.on("GET", "/api/definition", api::definition);
         r.on("GET", "/api/graph", api::graph);
         r.on("GET", "/api/changes", api::changes);
@@ -235,7 +237,7 @@ public final class EditorHttpServer {
     }
 
     private static boolean needsEditPermission(String path) {
-        return path.matches("^/api/(skills|mobs|items|droptables)(/.*)?$") || path.equals("/api/rescan");
+        return path.matches("^/api/(skills|mobs|items|droptables)(/.*)?$") || path.equals("/api/file") || path.equals("/api/rescan");
     }
 
     /** Writes must carry an Origin header (every browser sends one for POST/PUT/DELETE) that matches this server. */

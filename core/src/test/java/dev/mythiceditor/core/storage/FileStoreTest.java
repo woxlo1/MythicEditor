@@ -142,4 +142,83 @@ class FileStoreTest {
         FileStore restricted = new FileStore(settings, layout, guard, idx2, new BackupManager(guard.root(), "backups2", 5), new ChangeLog(10), Logger.getLogger("test2"));
         assertThrows(StoreException.class, () -> restricted.create(Kinds.MOB, "Boss", null, "Boss:\n  Type: ZOMBIE\n", "tester"));
     }
+
+    // ---- whole-file editing -------------------------------------------------------------------------
+
+    private static final String TWO_ENTRIES = "# header comment\nA:\n  Skills:\n  - damage{amount=1} @Target\n\n# between\nB:\n  Skills:\n  - damage{amount=2} @Target\n";
+
+    @Test
+    void wholeFileRoundTripKeepsEverything() throws Exception {
+        Files.writeString(tmp.resolve("Skills/Two.yml"), TWO_ENTRIES);
+        index.scan();
+        FileStore.FileDoc f = store.readFile("Skills/Two.yml");
+        assertEquals(TWO_ENTRIES, f.text());
+        assertEquals(2, f.entries());
+        assertEquals("skill", f.kind());
+        FileStore.FileDoc saved = store.saveFile("Skills/Two.yml", f.text(), f.hash(), false, "tester");
+        assertEquals(TWO_ENTRIES, Files.readString(tmp.resolve("Skills/Two.yml")));
+        assertEquals(f.hash(), saved.hash());
+    }
+
+    @Test
+    void wholeFileEditCanTouchSeveralEntriesAndAddNewOnes() throws Exception {
+        Files.writeString(tmp.resolve("Skills/Two.yml"), TWO_ENTRIES);
+        index.scan();
+        FileStore.FileDoc f = store.readFile("Skills/Two.yml");
+        String edited = f.text().replace("amount=1", "amount=100").replace("amount=2", "amount=200")
+            + "\nC:\n  Skills:\n  - message{m=hi} @Self\n";
+        FileStore.FileDoc saved = store.saveFile("Skills/Two.yml", edited, f.hash(), false, "tester");
+        assertEquals(3, saved.entries());
+        assertTrue(Files.readString(tmp.resolve("Skills/Two.yml")).contains("amount=200"));
+        // the entry level API sees the new content immediately (index was refreshed)
+        assertTrue(store.read(Kinds.SKILL, "C").text().contains("message{m=hi}"));
+        assertTrue(store.read(Kinds.SKILL, "A").text().contains("amount=100"));
+    }
+
+    @Test
+    void wholeFileSaveDetectsExternalChange() throws Exception {
+        Files.writeString(tmp.resolve("Skills/Two.yml"), TWO_ENTRIES);
+        index.scan();
+        FileStore.FileDoc f = store.readFile("Skills/Two.yml");
+        Files.writeString(tmp.resolve("Skills/Two.yml"), TWO_ENTRIES + "# changed elsewhere\n");
+        StoreException ex = assertThrows(StoreException.class, () -> store.saveFile("Skills/Two.yml", f.text() + "# mine\n", f.hash(), false, "tester"));
+        assertEquals("conflict", ex.code());
+        // force overwrites
+        store.saveFile("Skills/Two.yml", f.text() + "# mine\n", f.hash(), true, "tester");
+        assertTrue(Files.readString(tmp.resolve("Skills/Two.yml")).contains("# mine"));
+    }
+
+    @Test
+    void wholeFileSaveRefusesToBreakValidYaml() throws Exception {
+        Files.writeString(tmp.resolve("Skills/Two.yml"), TWO_ENTRIES);
+        index.scan();
+        FileStore.FileDoc f = store.readFile("Skills/Two.yml");
+        assertThrows(StoreException.class, () -> store.saveFile("Skills/Two.yml", "A:\n  X: [1, 2\n", f.hash(), false, "tester"));
+        assertEquals(TWO_ENTRIES, Files.readString(tmp.resolve("Skills/Two.yml")));
+    }
+
+    @Test
+    void wholeFileSaveKeepsCrlfAndMakesBackup() throws Exception {
+        String crlf = TWO_ENTRIES.replace("\n", "\r\n");
+        Files.writeString(tmp.resolve("Skills/Two.yml"), crlf);
+        index.scan();
+        FileStore.FileDoc f = store.readFile("Skills/Two.yml");
+        assertFalse(f.text().contains("\r"));
+        store.saveFile("Skills/Two.yml", f.text().replace("amount=1", "amount=7"), f.hash(), false, "tester");
+        String onDisk = Files.readString(tmp.resolve("Skills/Two.yml"));
+        assertTrue(onDisk.contains("amount=7"));
+        assertEquals(onDisk.length() - onDisk.replace("\r\n", "").length() > 0, true);
+        assertFalse(onDisk.replace("\r\n", "").contains("\n"));
+        assertTrue(Files.exists(tmp.resolve(new EditorSettings().backupDir)));
+    }
+
+    @Test
+    void wholeFileRejectsPathsOutsideContentFolders() throws Exception {
+        Files.writeString(tmp.resolve("secret.yml"), "a: 1\n");
+        index.scan();
+        assertThrows(StoreException.class, () -> store.readFile("secret.yml"));
+        assertThrows(StoreException.class, () -> store.readFile("../secret.yml"));
+        assertThrows(StoreException.class, () -> store.saveFile("secret.yml", "a: 2\n", "x", true, "tester"));
+        assertEquals("a: 1\n", Files.readString(tmp.resolve("secret.yml")));
+    }
 }

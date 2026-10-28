@@ -29,9 +29,9 @@ export function loadMonaco(): Promise<MonacoModule> {
 
 const REFERENCE_URL = "https://git.mythiccraft.io/mythiccraft/MythicMobs/-/wikis/home";
 
-type Theme = "dark" | "light";
+export type Theme = "dark" | "light";
 
-function loadTheme(): Theme {
+export function loadTheme(): Theme {
   try {
     return localStorage.getItem("mythiceditor.theme") === "light" ? "light" : "dark";
   } catch {
@@ -40,7 +40,7 @@ function loadTheme(): Theme {
 }
 
 /** Browser download of plain text as a .yml file (UTF-8, LF line endings). */
-function downloadYml(filenameBase: string, text: string) {
+export function downloadYml(filenameBase: string, text: string) {
   const safe = filenameBase.replace(/[^A-Za-z0-9_.\-]/g, "_") || "entry";
   const name = /\.ya?ml$/i.test(safe) ? safe : safe + ".yml";
   const body = text.replace(/\r\n/g, "\n").endsWith("\n") ? text.replace(/\r\n/g, "\n") : text.replace(/\r\n/g, "\n") + "\n";
@@ -64,6 +64,8 @@ export function EditorView(props: {
   onGotoEntry: (kind: Kind, id: string) => void;
   onDeleted: () => void;
   onRenamed: (newId: string) => void;
+  /** Opens the whole file this entry lives in (every entry, not just this one). */
+  onOpenFile?: (file: string, line: number) => void;
   autosave: boolean;
   autosaveDelayMs: number;
 }) {
@@ -225,6 +227,13 @@ export function EditorView(props: {
     setShowNew(kind);
   }
 
+  function openWholeFile() {
+    if (!entry || !props.onOpenFile) return;
+    if (dirtyRef.current && !window.confirm("未保存の変更があります。破棄してファイル全体を開きますか？")) return;
+    dirtyRef.current = false;
+    props.onOpenFile(entry.file, entry.line);
+  }
+
   function onEditorReady(ed: monaco.editor.IStandaloneCodeEditor) {
     editorRef.current = ed;
   }
@@ -287,6 +296,11 @@ export function EditorView(props: {
         <div class="mg-group">
           <button class="mg-btn" onClick={download} title={`${entry.id}.yml としてダウンロード`}>Download</button>
         </div>
+        {props.onOpenFile && (
+          <div class="mg-group">
+            <button class="mg-btn" onClick={openWholeFile} title={`${entry.file} をファイル全体として編集します`}>ファイル全体を編集</button>
+          </div>
+        )}
         <div class="mg-group">
           <button class="mg-btn" onClick={() => setShowHelp(true)}>Help</button>
         </div>
@@ -396,7 +410,7 @@ export function EditorView(props: {
 
 // ---- modals -------------------------------------------------------------------------------------------
 
-function ConflictModal(props: { conflict: ConflictInfo; myText: string; onReload: () => void; onOverwrite: () => void; onCancel: () => void }) {
+export function ConflictModal(props: { conflict: ConflictInfo; myText: string; onReload: () => void; onOverwrite: () => void; onCancel: () => void }) {
   return (
     <div class="modal-backdrop">
       <div class="modal" style={{ width: 560 }}>
@@ -416,7 +430,7 @@ function ConflictModal(props: { conflict: ConflictInfo; myText: string; onReload
   );
 }
 
-function ConfirmModal(props: { title: string; body: string; confirmLabel: string; danger?: boolean; onConfirm: () => void; onCancel: () => void }) {
+export function ConfirmModal(props: { title: string; body: string; confirmLabel: string; danger?: boolean; onConfirm: () => void; onCancel: () => void }) {
   return (
     <div class="modal-backdrop" onClick={(e) => e.target === e.currentTarget && props.onCancel()}>
       <div class="modal">

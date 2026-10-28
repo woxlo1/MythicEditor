@@ -6,15 +6,22 @@ import { CatalogIndex, NameIndex } from "./monaco/catalogIndex";
 import { Dashboard } from "./views/Dashboard";
 import { EntityList } from "./views/EntityList";
 import { EditorView, loadMonaco } from "./views/EditorView";
+import { FileList } from "./views/FileList";
+import { FileEditorView } from "./views/FileEditorView";
 import { GraphView } from "./views/GraphView";
 import { Toasts } from "./components/Toasts";
 import { pushToast } from "./lib/toast";
 
-type View = "dashboard" | "skills" | "mobs" | "graph";
+type View = "dashboard" | "skills" | "mobs" | "files" | "graph";
 
 interface OpenEntry {
   kind: Kind;
   id: string;
+}
+
+interface OpenFile {
+  path: string;
+  line: number;
 }
 
 export function App() {
@@ -22,6 +29,7 @@ export function App() {
   const [authError, setAuthError] = useState(false);
   const [view, setView] = useState<View>("dashboard");
   const [open, setOpen] = useState<OpenEntry | null>(null);
+  const [openFile, setOpenFile] = useState<OpenFile | null>(null);
   const [catalogIndex, setCatalogIndex] = useState<CatalogIndex | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
   const namesRef = useRef(new NameIndex());
@@ -112,6 +120,7 @@ export function App() {
             <button class={view === "dashboard" ? "active" : ""} onClick={() => setView("dashboard")}>📊 Dashboard</button>
             <button class={view === "skills" ? "active" : ""} onClick={() => setView("skills")}>📜 Skills</button>
             <button class={view === "mobs" ? "active" : ""} onClick={() => setView("mobs")}>👹 Mobs</button>
+            <button class={view === "files" ? "active" : ""} onClick={() => setView("files")}>📁 Files</button>
             <button class={view === "graph" ? "active" : ""} onClick={() => setView("graph")}>🕸 Graph</button>
           </nav>
           <div class="section-label">Editor</div>
@@ -121,10 +130,11 @@ export function App() {
               Autosave
             </label>
           </div>
-          {open && (
+          {(open || openFile) && (
             <Fragment>
               <div class="section-label">Currently Open</div>
-              <div style={{ padding: "0 12px 12px", fontFamily: "var(--mono)", fontSize: 12, color: "var(--accent)" }}>{open.kind}: {open.id}</div>
+              {open && <div style={{ padding: "0 12px 4px", fontFamily: "var(--mono)", fontSize: 12, color: "var(--accent)" }}>{open.kind}: {open.id}</div>}
+              {openFile && <div style={{ padding: "0 12px 12px", fontFamily: "var(--mono)", fontSize: 12, color: "var(--accent)", wordBreak: "break-all" }}>file: {openFile.path}</div>}
             </Fragment>
           )}
         </div>
@@ -152,11 +162,38 @@ export function App() {
                   autosave={autosave}
                   autosaveDelayMs={autosaveDelay}
                   onGotoEntry={gotoEntry}
+                  onOpenFile={(file, line) => {
+                    setOpenFile({ path: file, line });
+                    setView("files");
+                  }}
                   onRenamed={(newId) => setOpen({ kind: open.kind, id: newId })}
                   onDeleted={() => {
                     setOpen(null);
                     refreshNames();
                   }}
+                />
+              </div>
+            </div>
+          )}
+          {view === "files" && !openFile && (
+            <FileList refreshToken={refreshToken} onOpen={(file) => setOpenFile({ path: file, line: 1 })} />
+          )}
+          {view === "files" && openFile && (
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <div style={{ padding: "6px 12px", borderBottom: "1px solid var(--border)" }}>
+                <button class="ghost" onClick={() => setOpenFile(null)}>← Back to files</button>
+              </div>
+              <div style={{ flex: 1, minHeight: 0 }}>
+                <FileEditorView
+                  key={openFile.path}
+                  path={openFile.path}
+                  line={openFile.line}
+                  canEdit={session.permissions.edit}
+                  catalogIndex={catalogIndex}
+                  names={namesRef.current}
+                  autosave={autosave}
+                  autosaveDelayMs={autosaveDelay}
+                  onOpenFile={(file, line) => setOpenFile({ path: file, line })}
                 />
               </div>
             </div>

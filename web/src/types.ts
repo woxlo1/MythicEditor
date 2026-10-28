@@ -57,6 +57,25 @@ export interface EntryFull {
   warnings: string[];
 }
 
+/** One whole YAML file (as opposed to EntryFull, which is a single Skill/Mob block inside it). */
+export interface FileFull {
+  file: string;
+  kind: Kind;
+  text: string;
+  hash: string;
+  mtime: number;
+  entries: number;
+  warnings: string[];
+}
+
+export interface FileSummary {
+  file: string;
+  kind: Kind;
+  entries: number;
+  error: string;
+  problems: string[];
+}
+
 export interface ConflictInfo {
   code: "conflict";
   message: string;
