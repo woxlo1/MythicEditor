@@ -98,12 +98,13 @@ please open an issue with the compiler output.
 
 ## Relay mode (no open port) - Cloudflare Worker
 
-Easiest: set `relay.enabled: true` and `relay.api-token` (a Cloudflare "Edit Cloudflare Workers" token) - the plugin carries the Worker (`relay/worker.js` inside the jar), deploys it into your account on startup, generates the secret and keeps url/secret in `relay.json`; remove the token afterwards. Manual alternative: set `relay.enabled: true`, `relay.url` and `relay.secret` in `config.yml` and the plugin connects OUT to a Cloudflare
+Easiest: set `relay.enabled: true` and `relay.api-token` (a Cloudflare "Edit Cloudflare Workers" token with **minimum permissions: Workers Scripts: Edit only**) - the plugin carries the Worker (`relay/worker.js` inside the jar), deploys it into your account on startup, generates the secret and keeps url/secret in `relay.json`; **the token is cleared from `config.yml` after a successful deploy** (removed manually if cleanup fails). Manual alternative: set `relay.enabled: true`, `relay.url` and `relay.secret` in `config.yml` and the plugin connects OUT to a Cloudflare
 Worker (source and step-by-step setup in `relay-worker/`). Browsers talk to the Worker, the Worker forwards each request
 through the WebSocket, and the plugin answers it using the normal embedded server, so every session / permission / CSRF /
 Origin / rate-limit check still applies. `/mythiceditor` then prints links on the Worker's address. Turning relay on also
 turns on `security.trust-proxy-headers` automatically, and `web.public-url` defaults to `relay.url`.
 Several servers can share one Worker via `relay.server-id` (see `relay-worker/README.md`). Implementation: `core/.../web/RelayClient.java`.
+**Note:** `relay.url` must use `https://` (only `http://localhost`, `http://127.0.0.1`, `http://[::1]` are allowed for local testing). When relay is enabled and `web.bind-address` is unset/`0.0.0.0`/`::`, it is forced to `127.0.0.1`. Shared-origin isolation has limits as noted above.
 
 ## Editing a whole file
 
@@ -168,6 +169,7 @@ All of them default to `op`.
 - Only `.yml` files inside the configured MythicMobs content folders can be read or written (symlinks included),
   and every change is backed up first.
 - `mythicFolder` (the server's absolute path) is only reported to `mythiceditor.admin`.
+- **Relay/shared-origin limitations.** When multiple servers share the same Worker origin (friends mode), cookies and routing are separated by server id, but the browser origin is still shared. True isolation requires per-server hostnames (subdomains). Only trust friends you control/rely on. See Relay notes below.
 
 ## What's implemented
 

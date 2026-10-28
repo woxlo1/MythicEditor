@@ -4,6 +4,8 @@
 web:
   # Address the embedded web server binds to. Use 127.0.0.1 when a reverse proxy
   # (nginx / Caddy) terminates TLS in front of MythicEditor.
+  # NOTE: if relay.enabled is true and this is left as 0.0.0.0/:: or unset, it will be
+  # forced to 127.0.0.1 for safety.
   bind-address: "0.0.0.0"
   port: 8765
   # Public base URL used in the chat link, e.g. "https://editor.example.com".
@@ -21,14 +23,16 @@ web:
 relay:
   enabled: false
   # Address of your Worker, e.g. "https://mythiceditor.mythic-editor.workers.dev"
+  # Must use https:// except for http://localhost/127.0.0.1/[::1] (testing only).
   url: ""
   # Long random value. Must be exactly the same as the Worker's RELAY_SECRET.
   secret: ""
   # AUTOMATIC SETUP (no wrangler needed): paste a Cloudflare API token here and leave url/secret empty.
-  # Create it at dash.cloudflare.com -> My Profile -> API Tokens -> "Edit Cloudflare Workers" template.
+  # Create it at dash.cloudflare.com -> My Profile -> API Tokens -> "Edit Cloudflare Workers" template
+  # (minimum permission: Workers Scripts: Edit only). Use a custom token with minimal permissions.
   # On startup the plugin deploys the Worker it carries into your account, generates the secret and saves
-  # url + secret in relay.json. Remove the token afterwards. When the plugin is updated and its Worker changed,
-  # put the token back once to update the Worker as well.
+  # url + secret in relay.json. The token will be cleared from this file after successful deploy; if cleanup fails,
+  # remove it manually. When the plugin is updated and its Worker changed, put the token back once to update the Worker as well.
   api-token: ""
   # Only if the token can see several Cloudflare accounts.
   account-id: ""
@@ -37,6 +41,7 @@ relay:
   # FRIENDS' SERVERS on the same Worker (set this on YOUR server only): list their names, e.g. ["friend", "bob"].
   # On startup the console prints the 4 config lines each friend has to paste into their own config.yml
   # (no wrangler / Node needed on their side). Remove a name here and change the name they use to lock them out.
+  # NOTE: same-origin sharing has isolation limits - only trust friends.
   friends: []
   # Only when SEVERAL servers share one Worker: this server's name (a-z, 0-9, "-", e.g. "friend").
   # Leave empty for the Worker owner's own server. The secret above must then be the one that
@@ -71,6 +76,9 @@ security:
   # cannot add new lines using them (lines that already exist can stay). This is a deny-list, not a sandbox:
   # only give mythiceditor.edit to people you would trust with console access. [] switches the check off.
   restricted-mechanics: ["command", "cmd", "consolecommand", "playercommand", "runcommand", "executecommand"]
+  # Optional allow-list for mechanics. If non-empty, players without mythiceditor.unrestricted may only ADD mechanics
+  # that appear in this list (existing lines are still allowed). Leave empty for deny-list only behavior.
+  allowed-mechanics: []
 
 mythicmobs:
   # Empty = use the data folder of the installed MythicMobs plugin.

@@ -147,6 +147,7 @@ When your friend runs `/mythiceditor`, the plugin provides a link similar to:
 - **Revoking access:** Remove the server ID from `friends` and restart the server. To reuse the same friend, configure a new server ID; the old secret will no longer be accepted.
 - **Browser routing:** The browser switches to the server associated with the most recently opened link. To use two servers simultaneously in separate tabs, use separate browsers.
 - **Trust requirement:** Your friends' traffic also passes through your Worker. Only share access with people you trust.
+- **Shared-origin limits:** All servers share the same Worker origin. While session cookies and routing are separated per server, full isolation is not possible with a single origin; true separation requires per-server hostnames (subdomains). Treat friends mode as sharing a trust boundary.
 
 ---
 
@@ -154,6 +155,9 @@ When your friend runs `/mythiceditor`, the plugin provides a link similar to:
 
 - `/_relay/connect` rejects connections unless the supplied `RELAY_SECRET` matches the configured secret. **Never share your secret with anyone you do not trust.**
 - Browser requests are forwarded to the plugin's HTTP server through `127.0.0.1`. The same authentication, permissions, CSRF, Origin, and rate-limit checks used for direct access also apply.
-- The Worker forwards only the following request headers: `Cookie`, `Content-Type`, `Accept`, `Accept-Encoding`, `If-None-Match`, `X-CSRF-Token`, and `Origin`.
+- The Worker forwards only the following request headers: `Cookie`, `Content-Type`, `Accept`, `Accept-Encoding`, `If-None-Match`, `X-CSRF-Token`, and `Origin`. Only the target server's session cookie is forwarded; other cookies are stripped.
 - The Worker overwrites the client IP using Cloudflare's connection metadata. Client-supplied `X-Forwarded-For` values are not trusted.
 - Only one active connection is allowed per server ID. If another server connects using the same ID and secret, the previous connection is disconnected.
+- The Worker enforces per-IP rate limiting and sets security headers (`Content-Security-Policy`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`).
+- Routing switches via `/_relay/*` and `/s/*`/`/editor/*` require `Sec-Fetch-Dest: document` (navigation); fetch-based switches are rejected. If `RELAY_SECRET` is shorter than 16 characters, `/_relay/connect` is rejected.
+- **Future improvement:** Subdomain-based separation (separate hostnames per server) would provide true origin isolation; consider this if stronger separation is required. Current same-origin sharing requires trusting all participants.
