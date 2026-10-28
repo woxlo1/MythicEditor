@@ -1,116 +1,159 @@
-# MythicEditor 中継Worker (relay-worker)
+# MythicEditor Relay Worker (`relay-worker`)
 
-## いちばん簡単: プラグインに任せる (wrangler不要)
+## Easiest option: Let the plugin handle everything (no Wrangler required)
 
-**Workerのコードはプラグイン(jar)に入っています。** Cloudflareの「APIトークン」を1回渡すと、プラグインが起動時に
-自分でWorkerをあなたのCloudflareアカウントへデプロイし、合言葉も自動で作ります。
+**The Worker code is bundled inside the plugin JAR.** Provide a Cloudflare API token once, and the plugin will deploy the Worker to your Cloudflare account on startup and automatically generate a shared secret.
 
-1. Cloudflareダッシュボード → 右上アイコン → プロフィール → **APIトークン** → トークンを作成 →
-   テンプレート **「Cloudflare Workersを編集」** を使用 → アカウントリソースは自分のアカウント、
-   ゾーンリソースは「すべてのゾーン」 → 作成してトークンをコピー(表示は1回だけ)。
-2. `plugins/MythicEditor/config.yml`:
+1. Open the Cloudflare dashboard. Click your profile icon in the top-right corner, go to **My Profile → API Tokens**, and create a token using the **Edit Cloudflare Workers** template. Select your own account under Account Resources and **All zones** under Zone Resources. Create the token and copy it. The token will only be displayed once.
+2. Edit `plugins/MythicEditor/config.yml`:
+
    ```yaml
    relay:
      enabled: true
-     api-token: "コピーしたトークン"
+     api-token: "YOUR_COPIED_TOKEN"
    ```
-   `url` と `secret` は空のままで構いません。
-3. サーバーを再起動。コンソールに `Relay: Worker is ready at https://....workers.dev` → `Relay: connected` と出ます。
-   URLと合言葉は `plugins/MythicEditor/relay.json` に保存されます。
-4. **`api-token` の行は削除してください**(トークンは起動時の1回しか使わず、保存もしません)。
-   以後はトークンなしで `relay.json` から自動で繋がります。
-5. プラグインを更新してWorkerの中身が変わったときは、トークンを一時的に戻して再起動すると、Workerも自動で更新されます。
 
-- すでにこのフォルダで `wrangler deploy` 済みでも、そのまま使えます(config.yml の `url` / `secret` を書く従来の方法)。
-- 前提: Cloudflareアカウントに workers.dev のサブドメインがあること(Workers & Pages を一度開いていれば作成済みです)。
-- アカウントが複数見えるトークンなら `relay.account-id` も指定します。Workerの名前は `relay.worker-name`(既定 mythiceditor)。
+   You can leave `url` and `secret` empty.
+
+3. Restart your server. The console should display messages similar to:
+
+   ```
+   Relay: Worker is ready at https://....workers.dev
+   Relay: connected
+   ```
+
+   The URL and shared secret are saved in `plugins/MythicEditor/relay.json`.
+
+4. **Remove the `api-token` line from `config.yml`.** The token is only needed for the initial deployment and is not required for subsequent connections. The plugin does not retain the token after deployment.
+
+   After that, the plugin will automatically connect using the credentials stored in `relay.json`.
+
+5. If a plugin update changes the Worker code, temporarily add the API token back to `config.yml` and restart the server to redeploy the updated Worker.
+
+- If you have already deployed the Worker using `wrangler deploy` from this directory, you can continue using the existing configuration method by setting `url` and `secret` in `config.yml`.
+- Your Cloudflare account must have a `workers.dev` subdomain. You can create one by opening **Workers & Pages** in the Cloudflare dashboard.
+- If your API token can access multiple accounts, specify `relay.account-id` as well. The Worker name is configured using `relay.worker-name` and defaults to `mythiceditor`.
 
 ---
 
-## 手動でデプロイする場合 (wrangler)
+## Manual deployment using Wrangler
 
-ブラウザ → **このWorker** → (WebSocket) → Minecraftサーバーのプラグイン、という経路でエディタを開きます。
-プラグインから Cloudflare へ「外向き」に接続するので、サーバー側のポート開放やトンネルは不要です。
+The request flow is:
 
-## 初回だけ必要な作業 (wrangler でデプロイ)
+**Browser → Cloudflare Worker → Minecraft server plugin**
 
-中継には Durable Object が必要で、Durable Object のクラスは **Cloudflareの画面にコードを貼るだけでは作れません**
-(`wrangler deploy` が必要です)。一度デプロイしてしまえば、以後のコード修正は画面への貼り替えでも大丈夫です。
+The plugin establishes an outbound connection to Cloudflare, so you do not need to open ports on your Minecraft server or configure a tunnel.
 
-1. Node.js (LTS) を入れる: https://nodejs.org
-2. この `relay-worker` フォルダでターミナル(PowerShell など)を開く
-3. ログイン(ブラウザが開きます):
-   ```
+## One-time setup (deploying with Wrangler)
+
+A Durable Object is required for the relay. **You cannot create the Durable Object class simply by pasting code into the Cloudflare dashboard.** You must deploy it using `wrangler deploy` at least once. After the initial deployment, you can update the Worker code by pasting the updated code into the dashboard if necessary.
+
+1. Install Node.js (LTS): https://nodejs.org
+2. Open a terminal, such as PowerShell, in the `relay-worker` directory.
+3. Log in to Cloudflare. A browser window will open:
+
+   ```bash
    npx wrangler login
    ```
-4. デプロイ(既存の `mythiceditor` Worker を置き換えます。URLは今までと同じ):
-   ```
+
+4. Deploy the Worker. This replaces the existing `mythiceditor` Worker while keeping its URL unchanged:
+
+   ```bash
    npx wrangler deploy
    ```
-5. 合言葉(RELAY_SECRET)を登録。長いランダム文字列を自分で決めて貼り付けます:
-   ```
+
+5. Configure the shared secret (`RELAY_SECRET`). Generate a long, random string and register it as a secret:
+
+   ```bash
    npx wrangler secret put RELAY_SECRET
    ```
-   ランダム文字列の作り方 (PowerShell):
-   ```
+
+   To generate a random string in PowerShell:
+
+   ```powershell
    -join ((48..57)+(97..122) | Get-Random -Count 40 | % {[char]$_})
    ```
-   (画面から設定する場合: Workers & Pages → mythiceditor → 設定 → 変数とシークレット → 種類「シークレット」/ 名前 `RELAY_SECRET`)
 
-## プラグイン側 (plugins/MythicEditor/config.yml)
+   Alternatively, configure it in the Cloudflare dashboard under **Workers & Pages → mythiceditor → Settings → Variables and Secrets**. Select **Secret** as the type and enter `RELAY_SECRET` as the name.
+
+## Plugin configuration (`plugins/MythicEditor/config.yml`)
 
 ```yaml
 web:
-  bind-address: "127.0.0.1"   # 中継だけで使うなら外部公開しない
+  bind-address: "127.0.0.1"   # Keep the HTTP server private when using the relay exclusively.
+
 relay:
   enabled: true
   url: "https://mythiceditor.mythic-editor.workers.dev"
-  secret: "さっき登録したRELAY_SECRETと同じ文字列"
+  secret: "THE_SAME_VALUE_AS_RELAY_SECRET"
 ```
 
-保存後 `/mythiceditor reload`(または再起動)。コンソールに `Relay: connected to wss://...` と出れば成功です。
-ゲーム内で `/mythiceditor` を実行すると、Workerのアドレスのリンクが出ます。
+After saving the configuration, run `/mythiceditor reload` or restart the server.
 
-## 動作の確認ポイント
+If the console displays a message similar to:
 
-| 状態 | 結果 |
+```
+Relay: connected to wss://...
+```
+
+the connection has been established successfully.
+
+Running `/mythiceditor` in-game displays a link to the editor through the Worker.
+
+## Troubleshooting
+
+| State | Expected result |
 |---|---|
-| プラグイン未接続 | ブラウザに「Minecraftサーバーに接続できません」(503) |
-| 合言葉が違う | プラグインのコンソールに接続失敗の警告(自動で再試行) |
-| 接続中 | `/mythiceditor` のリンクでエディタが開く |
+| Plugin is not connected | The browser displays "Cannot connect to the Minecraft server" (503). |
+| Incorrect shared secret | The plugin logs a connection failure warning and retries automatically. |
+| Connected | The link provided by `/mythiceditor` opens the editor. |
 
-## 1つのWorkerで複数のサーバーを使う (友達のサーバーなど)
+## Using one Worker for multiple servers (friends and server IDs)
 
-友達側に wrangler も Node も要りません。あなたのサーバーの `config.yml` に友達の名前を書くだけです。
+Your friends do not need Wrangler or Node.js. If you operate the Worker, you only need to configure their server IDs in your own `config.yml`.
 
-1. あなたの `config.yml`(Workerを持っている側):
-   ```yaml
-   relay:
-     friends: ["friend"]      # 友達サーバーの名前(小文字英数字と -、2〜31文字、main は不可)
-   ```
-   サーバーを再起動すると、コンソールに友達用の設定4行が表示されます。
-2. その4行を友達に送り、友達の `config.yml` に貼ってもらいます(友達はjarを入れるだけ):
-   ```yaml
-   relay:
-     enabled: true
-     url: "https://....workers.dev"
-     secret: "友達専用の合言葉"
-     server-id: "friend"
-   ```
-3. 友達が `/mythiceditor` を実行すると、`https://.../s/friend/editor/...` というリンクが出ます。
+### 1. Configure the allowed server IDs
 
-- Workerが古い場合(複数サーバー対応の前のもの)は、あなたの側で一度だけ更新が必要です。`relay.api-token` を書いて再起動すれば、プラグインが自動で更新します。
-- サーバーごとに別々に同時接続でき、奪い合いは起きません。
-- 友達は自分専用の合言葉しか持たず、あなたの `RELAY_SECRET` や他の人の合言葉は分かりません。
-- 締め出すには、`friends` から名前を消して再起動し、新しい名前で作り直してください(古い名前の合言葉は使えなくなります)。
-- ブラウザは最後に開いたリンクのサーバーに切り替わります。2つのサーバーを同時に別タブで使うなら、ブラウザを分けてください。
-- 友達の通信もあなたのWorkerを通ります。信頼できる相手に限ってください。
+In your `config.yml` on the server hosting the Worker:
 
-## セキュリティ
+```yaml
+relay:
+  friends: ["friend"]      # Friend's server ID: lowercase letters, digits, and hyphens; 2–31 characters. "main" is not allowed.
+```
 
-- `/_relay/connect` は `RELAY_SECRET` が一致しないと接続できません。**合言葉は他人に教えないでください。**
-- ブラウザからの要求は、プラグインのHTTPサーバーに 127.0.0.1 経由でそのまま渡されます。ログイン(ワンタイムリンク→Cookie)、
-  権限、CSRF、Origin、レート制限は直接アクセス時と同じ検査が効きます。
-- Workerが中継するのは Cookie / Content-Type / Accept / Accept-Encoding / If-None-Match / X-CSRF-Token / Origin だけです。
-  接続元IPは Cloudflare の値でWorker側が上書きします(ブラウザが偽装した X-Forwarded-For は使われません)。
-- 同じ名前(server-id)のサーバーは同時に1本だけです。同じ合言葉で別のサーバーが繋ぐと、前の接続は切られます。
+Restart your server. The console will display four lines of configuration for your friend's server.
+
+### 2. Send the configuration to your friend
+
+Send those four configuration lines to your friend. They can paste them into their own `config.yml`. Your friend only needs to install the plugin JAR.
+
+```yaml
+relay:
+  enabled: true
+  url: "https://....workers.dev"
+  secret: "FRIEND_SPECIFIC_SECRET"
+  server-id: "friend"
+```
+
+### 3. Open the editor
+
+When your friend runs `/mythiceditor`, the plugin provides a link similar to:
+
+`https://.../s/friend/editor/...`
+
+- **Updating an older Worker:** If your Worker predates multi-server support, update it once. Add `relay.api-token` and restart the server to let the plugin deploy the updated Worker automatically.
+- **Independent connections:** Each server has its own connection, so servers do not compete for the same connection slot.
+- **Separate shared secrets:** Your friend only receives their own secret. They do not need to know your `RELAY_SECRET` or any other server's secret.
+- **Revoking access:** Remove the server ID from `friends` and restart the server. To reuse the same friend, configure a new server ID; the old secret will no longer be accepted.
+- **Browser routing:** The browser switches to the server associated with the most recently opened link. To use two servers simultaneously in separate tabs, use separate browsers.
+- **Trust requirement:** Your friends' traffic also passes through your Worker. Only share access with people you trust.
+
+---
+
+## Security
+
+- `/_relay/connect` rejects connections unless the supplied `RELAY_SECRET` matches the configured secret. **Never share your secret with anyone you do not trust.**
+- Browser requests are forwarded to the plugin's HTTP server through `127.0.0.1`. The same authentication, permissions, CSRF, Origin, and rate-limit checks used for direct access also apply.
+- The Worker forwards only the following request headers: `Cookie`, `Content-Type`, `Accept`, `Accept-Encoding`, `If-None-Match`, `X-CSRF-Token`, and `Origin`.
+- The Worker overwrites the client IP using Cloudflare's connection metadata. Client-supplied `X-Forwarded-For` values are not trusted.
+- Only one active connection is allowed per server ID. If another server connects using the same ID and secret, the previous connection is disconnected.
