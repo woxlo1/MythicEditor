@@ -96,8 +96,20 @@ public final class RelayClient implements AutoCloseable {
 
     /** https://host/path -> wss://host/_relay/connect (?id=NAME when this is not the Worker's default server) */
     static URI toWebSocketUri(String relayUrl, String serverId) {
-        URI base = URI.create(relayUrl.trim());
-        String scheme = "https".equalsIgnoreCase(base.getScheme()) ? "wss" : "ws";
+        String trimmed = relayUrl == null ? "" : relayUrl.trim();
+        URI base = URI.create(trimmed);
+        String schemeBase = base.getScheme() == null ? "" : base.getScheme().toLowerCase(Locale.ROOT);
+        String host = base.getHost();
+        boolean allowHttp = ("http".equals(schemeBase)) && (("localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host) || "[::1]".equals(host) || "::1".equals(host)));
+        if ("http".equals(schemeBase) && !allowHttp) {
+            throw new IllegalArgumentException("relay.url must use https:// (except http://localhost/127.0.0.1/[::1] for testing)");
+        }
+        String scheme = "https".equalsIgnoreCase(base.getScheme()) ? "wss" : (allowHttp ? "ws" : "ws");
+        if ("http".equals(schemeBase) && allowHttp) {
+            scheme = "ws";
+        } else {
+            scheme = "wss";
+        }
         String authority = base.getRawAuthority();
         String query = serverId == null || serverId.isBlank() ? "" : "?id=" + serverId;
         return URI.create(scheme + "://" + authority + "/_relay/connect" + query);

@@ -244,7 +244,22 @@ public final class EditorSettings {
         }
         // With an api-token the plugin deploys the Worker and fills url/secret itself.
         if (relayApiToken.isEmpty()) {
-            if (!(relayUrl.startsWith("https://") || relayUrl.startsWith("http://"))) {
+            if (relayUrl.isBlank()) {
+                return "relay.url must start with https:// (the address of your Cloudflare Worker), or set relay.api-token to let the plugin deploy it";
+            }
+            String lower = relayUrl.toLowerCase(java.util.Locale.ROOT);
+            if (lower.startsWith("http://")) {
+                // Allow only localhost for testing
+                try {
+                    java.net.URI u = java.net.URI.create(relayUrl);
+                    String h = u.getHost();
+                    if (!("localhost".equalsIgnoreCase(h) || "127.0.0.1".equals(h) || "[::1]".equals(h) || "::1".equals(h))) {
+                        return "relay.url must use https:// (except http://localhost/127.0.0.1/[::1] for testing)";
+                    }
+                } catch (Exception e) {
+                    return "relay.url must use https:// (except http://localhost/127.0.0.1/[::1] for testing)";
+                }
+            } else if (!lower.startsWith("https://")) {
                 return "relay.url must start with https:// (the address of your Cloudflare Worker), or set relay.api-token to let the plugin deploy it";
             }
             if (relaySecret.length() < 16) return "relay.secret must be set to a long random value (at least 16 characters), or set relay.api-token";
