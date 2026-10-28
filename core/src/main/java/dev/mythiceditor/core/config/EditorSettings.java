@@ -133,6 +133,19 @@ public final class EditorSettings {
         trustProxyHeaders = true;
         // The editor links and the Origin check must use the public (Worker) address.
         if (!publicUrlConfigured && !relayUrl.isBlank()) publicUrl = relayUrl;
+        // If relay is enabled and bind-address is unspecified / 0.0.0.0 / ::, force to 127.0.0.1
+        if (bindAddress == null || bindAddress.isBlank() || "0.0.0.0".equals(bindAddress) || "::".equals(bindAddress) || "[::]".equals(bindAddress)) {
+            bindAddress = "127.0.0.1";
+            // Log via system logger is not directly available here; caller/logging will see via boot message - but requirement says "INFO 1"
+            System.out.println("[MythicEditor] INFO: relay enabled with bind-address 0.0.0.0/::, forcing bind-address to 127.0.0.1 for security.");
+        } else {
+            // If explicitly set to something else, respect but warn as per requirement says "、WARNING "
+            // "。"
+            // The requirement states: "、INFO 1。 、WARNING 。" So if user explicitly specified something else (not the defaults), warn.
+            // Our condition above only triggers on defaults/unspecified; for others we should warn if different? Wait: "relay 、bind-address 、0.0.0.0 :: 、127.0.0.1 、INFO 1。 、WARNING 。"
+            // So if it's not specified/was default AND is 0.0.0.0 or :: -> force to 127.0.0.1 and INFO. If user explicitly specified something else (e.g. 192.168.1.5) -> respect and WARNING.
+            System.out.println("[MythicEditor] WARNING: relay enabled with non-loopback bind-address '" + bindAddress + "'; this may expose the local server. Ensure only trusted proxies can reach it.");
+        }
     }
 
     public static EditorSettings fromMap(Map<?, ?> root) {
