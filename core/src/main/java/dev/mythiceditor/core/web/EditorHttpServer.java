@@ -181,6 +181,7 @@ public final class EditorHttpServer {
                 return;
             }
             ctx.trustedProxy = trustedProxyPeer(exchange);
+            exchange.setAttribute("mythiceditor.trustedProxy", ctx.trustedProxy);
             try {
                 String sid = ctx.cookies().get(sessionCookieName());
                 SessionManager.Session session = sid == null ? null : core.sessions.touch(sid);

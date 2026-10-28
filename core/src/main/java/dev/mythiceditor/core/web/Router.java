@@ -88,6 +88,18 @@ public final class Router implements HttpHandler {
 
         // Preserve the session authenticated by EditorHttpServer.
         ctx.session = session;
+        // trustedProxy is set by EditorHttpServer.wrap() before calling router; ensure it's preserved if passed
+        // (Router currently creates a fresh Ctx but doesn't copy trustedProxy; wrap sets it on its ctx then passes session - 
+        // but in our flow wrap() creates ctx, sets ctx.trustedProxy, assigns session to ctx, then calls router.handle(exchange, session);
+        // Router creates a NEW ctx and overwrites ctx.session = session, losing trustedProxy. We need to carry it over.)
+        // The trustedProxy is set on the ctx created in wrap() - we can't access it directly; better approach: pass trustedProxy via a thread-local or
+        // have Router copy from exchange context? Easier: check - wrap sets ctx.trustedProxy, then sets ctx.session and calls router.handle(exchange, session).
+        // Router creates a fresh Ctx(exchange, params) and does ctx.session = session, so trustedProxy is lost. Fix by also copying trustedProxy from the original ctx if possible.
+        // But Router doesn't have access to wrap's ctx. Alternative: store in exchange attribute.
+        Object tp = exchange.getAttribute("mythiceditor.trustedProxy");
+        if (tp instanceof Boolean b) {
+            ctx.trustedProxy = b;
+        }
 
         try {
             if (match != null) {
